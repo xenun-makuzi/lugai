@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LugaiTCG — Premium Trading Cards & Collectibles</title>
+<meta name="description" content="America's premier destination for authentic Pokémon cards, sports cards, graded collectibles, booster boxes and accessories.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Firebase v10 modular SDK via CDN compat build -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#8B6914;
+  --bg:#0A0A0F;--bg2:#111118;--bg3:#1A1A24;--bg4:#22222F;
+  --text:#F0EEE8;--text2:#A09E98;--text3:#5A5858;
+  --accent:#00D4FF;--accent2:#7B5CF0;--red:#FF4757;--green:#2ECC71;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --radius:8px;--radius-lg:14px;--radius-xl:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.page{display:none;min-height:100vh}.page.active{display:block}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer;flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.nav-link{background:none;border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 13px;cursor:pointer;border-radius:var(--radius);transition:all .2s;white-space:nowrap}
+.nav-link:hover{color:var(--text);background:var(--bg3)}.nav-link.active{color:var(--gold)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-cart{position:relative;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 16px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-cart:hover{border-color:var(--gold);color:var(--gold)}
+.cart-badge{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.btn-admin{background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 12px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s}
+.btn-admin:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* BUTTONS */
+.btn{padding:12px 24px;border-radius:var(--radius);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0A0A0F;font-weight:600}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.3)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+
+/* HERO */
+.hero{min-height:90vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:80px 24px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(201,168,76,.08) 0%,transparent 70%),radial-gradient(ellipse 60% 80% at 20% 80%,rgba(123,92,240,.06) 0%,transparent 60%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;opacity:.4}
+.hero-content{max-width:680px;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;margin-bottom:24px}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);line-height:.95;letter-spacing:2px;margin-bottom:20px}
+.hero h1 span{background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:18px;color:var(--text2);line-height:1.6;margin-bottom:36px;max-width:520px}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px}
+.hero-stats{display:flex;gap:40px;margin-top:60px;padding-top:40px;border-top:1px solid var(--border);flex-wrap:wrap}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:var(--gold)}
+.stat-label{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* SECTIONS */
+.section{padding:80px 24px;max-width:1200px;margin:0 auto}
+.section-header{margin-bottom:48px}
+.section-label{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,52px);letter-spacing:1px;line-height:1}
+.section-sub{color:var(--text2);font-size:16px;margin-top:12px;max-width:500px}
+
+/* CATEGORIES */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.cat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 16px;cursor:pointer;transition:all .25s;text-align:center}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-3px);background:var(--bg3)}
+.cat-icon{font-size:32px;margin-bottom:10px;display:block}
+.cat-name{font-size:13px;font-weight:500}.cat-count{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* PRODUCT CARDS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.product-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
+.product-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.product-img{width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg3);position:relative;overflow:hidden}
+.product-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.product-card:hover .product-img img{transform:scale(1.05)}
+.product-img .img-ph{font-size:64px;color:var(--text3)}
+.product-badge{position:absolute;top:10px;left:10px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge-new{background:var(--accent);color:#000}.badge-rare{background:var(--gold);color:#000}
+.badge-sale{background:var(--red);color:#fff}.badge-limited{background:var(--accent2);color:#fff}
+.wishlist-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;background:rgba(10,10,15,.8);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;border:none;color:var(--text2)}
+.wishlist-btn:hover{background:rgba(255,71,87,.2);color:var(--red)}
+.product-info{padding:14px}
+.product-name{font-size:14px;font-weight:500;line-height:1.3;margin-bottom:4px}
+.product-category{font-size:12px;color:var(--text3);margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:1px}
+.product-price small{font-size:12px;color:var(--text3);font-family:'DM Sans',sans-serif;text-decoration:line-through;margin-left:4px}
+.btn-add{background:var(--bg4);border:none;color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-add:hover{background:var(--gold);color:#000}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px 20px}
+.feature-icon{font-size:28px;margin-bottom:14px}
+.feature-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* REVIEWS */
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.review-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px}
+.review-stars{color:var(--gold);font-size:16px;margin-bottom:12px}
+.review-text{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.reviewer{display:flex;align-items:center;gap:10px}
+.reviewer-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px}
+.reviewer-name{font-size:14px;font-weight:500}.reviewer-location{font-size:12px;color:var(--text3)}
+
+/* NEWSLETTER */
+.newsletter{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:60px 40px;text-align:center;position:relative;overflow:hidden}
+.newsletter::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(201,168,76,.07),transparent);pointer-events:none}
+.newsletter h2{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;margin-bottom:12px}
+.newsletter p{color:var(--text2);margin-bottom:28px}
+.newsletter-form{display:flex;gap:10px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.newsletter-input{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:12px 16px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+.newsletter-input::placeholder{color:var(--text3)}.newsletter-input:focus{border-color:var(--gold)}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24px 32px}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:32px;max-width:1200px;margin:0 auto 48px}
+.footer-brand p{font-size:13px;color:var(--text2);line-height:1.6;margin-top:12px}
+.footer-col h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:16px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
+.footer-col a{display:block;font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:8px;transition:color .2s;text-decoration:none}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:12px;color:var(--text3)}
+.socials{display:flex;gap:10px;margin-top:16px}
+.social-btn{width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;background:none}
+.social-btn:hover{border-color:var(--gold);transform:translateY(-2px)}
+
+/* SHOP */
+.shop-header{padding:48px 24px 0;max-width:1200px;margin:0 auto}
+.shop-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px}
+.search-box{position:relative;flex:1;min-width:180px}
+.search-input{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:10px 16px 10px 40px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+.search-input::placeholder{color:var(--text3)}.search-input:focus{border-color:var(--gold)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3)}
+.filter-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;outline:none}
+.filter-select:focus{border-color:var(--gold)}
+.filter-btn{background:var(--bg2);border:1px solid var(--border2);color:var(--text2);padding:10px 16px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;transition:all .2s}
+.filter-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+/* PRODUCT DETAIL */
+.product-detail{padding:48px 24px;max-width:1200px;margin:0 auto}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.detail-img-main{width:100%;aspect-ratio:1;background:var(--bg3);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden}
+.detail-img-main img{width:100%;height:100%;object-fit:contain;padding:8px}
+.detail-thumbs{display:flex;gap:8px;margin-top:12px}
+.detail-thumb{width:64px;height:64px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s}
+.detail-thumb:hover,.detail-thumb.active{border-color:var(--gold)}
+.detail-thumb img{width:100%;height:100%;object-fit:contain}
+.detail-brand{font-size:12px;color:var(--gold);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:10px}
+.detail-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,42px);letter-spacing:1px;line-height:1.05;margin-bottom:16px}
+.detail-price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.detail-price{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);letter-spacing:1px}
+.detail-old-price{font-size:20px;color:var(--text3);text-decoration:line-through}
+.detail-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.detail-badge{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.status-in{background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);color:var(--green)}
+.status-low{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);color:var(--red)}
+.detail-desc{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:24px}
+.qty-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.qty-label{font-size:14px;color:var(--text2)}
+.qty-control{display:flex;align-items:center;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.qty-btn{background:var(--bg3);border:none;color:var(--text);width:36px;height:36px;cursor:pointer;font-size:18px;transition:background .2s}
+.qty-btn:hover{background:var(--bg4)}.qty-num{width:44px;text-align:center;font-size:15px;font-weight:500}
+.detail-actions{display:flex;gap:10px;flex-wrap:wrap}
+.detail-specs{margin-top:32px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.spec-title{font-size:14px;font-weight:600;margin-bottom:14px}
+.spec-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.spec-row:last-child{border-bottom:none}
+.spec-key{color:var(--text2)}.spec-val{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* CART */
+.cart-page{padding:48px 24px;max-width:1100px;margin:0 auto}
+.cart-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;margin-bottom:32px}
+.cart-layout{display:grid;grid-template-columns:1fr 400px;gap:24px;align-items:start}
+@media(max-width:820px){.cart-layout{grid-template-columns:1fr}}
+.cart-items{display:flex;flex-direction:column;gap:12px}
+.cart-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cart-item-img{width:70px;height:70px;background:var(--bg3);border-radius:var(--radius);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cart-item-img img{width:100%;height:100%;object-fit:cover}
+.cart-item-info{flex:1;min-width:140px}
+.cart-item-name{font-size:14px;font-weight:500;margin-bottom:3px}
+.cart-item-cat{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.cart-item-price{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);margin-top:4px}
+.cart-item-actions{display:flex;align-items:center;gap:10px}
+.cart-order-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;position:sticky;top:80px}
+.panel-title{font-size:15px;font-weight:600;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;color:var(--text2);margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.form-input::placeholder{color:var(--text3)}.form-input:focus{border-color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* DISCOUNT */
+.discount-row{display:flex;gap:8px;margin-bottom:4px}
+.discount-row input{flex:1}
+.discount-row button{padding:10px 14px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;white-space:nowrap;transition:all .2s}
+.discount-row button:hover{border-color:var(--gold);color:var(--gold)}
+.discount-applied{font-size:12px;color:var(--green);margin-top:4px;display:none}
+.discount-error{font-size:12px;color:var(--red);margin-top:4px;display:none}
+
+.order-total{margin:20px 0;padding:16px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:var(--radius-lg)}
+.total-row{display:flex;justify-content:space-between;font-size:14px;color:var(--text2);margin-bottom:6px}
+.total-discount-row{display:flex;justify-content:space-between;font-size:14px;color:var(--green);margin-bottom:6px}
+.total-final{display:flex;justify-content:space-between;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:1px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(201,168,76,.2)}
+.btn-checkout{width:100%;padding:14px;font-size:16px;border-radius:var(--radius-lg);margin-top:12px;justify-content:center}
+.empty-state{text-align:center;padding:80px 24px}
+.empty-icon{font-size:80px;margin-bottom:20px}
+.empty-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:8px}
+.empty-sub{color:var(--text2);font-size:15px;margin-bottom:24px}
+
+/* PAYMENT */
+.payment-page{padding:48px 24px;max-width:800px;margin:0 auto}
+.payment-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;margin-bottom:8px}
+.payment-sub{color:var(--text2);font-size:15px;margin-bottom:36px}
+.payment-tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border)}
+.payment-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:10px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:all .2s;margin-bottom:-1px}
+.payment-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.payment-panel{display:none}.payment-panel.active{display:block}
+.payment-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px}
+.crypto-address{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;color:var(--accent);margin:16px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.copy-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .2s}
+.copy-btn:hover{background:rgba(0,212,255,.1);color:var(--accent);border-color:var(--accent)}
+.qr-box{width:160px;height:160px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:64px;margin:16px auto}
+.pay-instructions{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:var(--radius-lg);padding:16px;font-size:13px;color:var(--text2);line-height:1.8;margin-top:16px}
+.pay-instructions strong{color:var(--gold)}
+
+/* ADMIN */
+.admin-page{padding:32px 24px;max-width:1100px;margin:0 auto}
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+.admin-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:32px}
+.admin-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.admin-stat-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);letter-spacing:1px}
+.admin-stat-label{font-size:13px;color:var(--text2);margin-top:4px}
+.admin-table{width:100%;border-collapse:collapse;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+.admin-table th{padding:12px 16px;text-align:left;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text3);letter-spacing:1px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.admin-table td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:rgba(255,255,255,.02)}
+.status-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.stock-in{background:rgba(46,204,113,.1);color:var(--green)}
+.stock-low{background:rgba(255,71,87,.1);color:var(--red)}
+.stock-out{background:rgba(90,88,88,.3);color:var(--text3)}
+.action-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border2);background:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .2s;margin-right:4px}
+.action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.action-btn.del{border-color:rgba(255,71,87,.3);color:rgba(255,71,87,.6)}
+.action-btn.del:hover{border-color:var(--red);color:var(--red)}
+.add-product-form{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:28px}
+
+/* FIREBASE LOADING STATE */
+.fb-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADMIN LOGIN OVERLAY */
+#admin-login-overlay{position:fixed;inset:0;background:rgba(10,10,15,.97);backdrop-filter:blur(16px);z-index:500;display:none;align-items:center;justify-content:center}
+.admin-login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:48px 40px;width:100%;max-width:400px;text-align:center}
+.admin-login-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin:8px 0 4px}
+.admin-login-sub{font-size:13px;color:var(--text3);margin-bottom:28px}
+.admin-login-box .form-group{text-align:left;margin-bottom:14px}
+.admin-login-error{color:var(--red);font-size:13px;margin-bottom:10px;display:none}
+.admin-user-bar{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px;font-size:13px;color:var(--text2)}
+.admin-user-bar span{flex:1}
+.admin-logout-btn{background:none;border:1px solid rgba(255,71,87,.3);color:var(--red);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .2s}
+.admin-logout-btn:hover{background:rgba(255,71,87,.1)}
+
+/* IMAGE UPLOAD */
+.img-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.img-upload-zone input{display:none}
+.img-upload-zone p{font-size:13px;color:var(--text2);margin-top:8px}
+.img-preview-wrap{position:relative;display:inline-block;margin-top:10px}
+.img-preview-wrap img{width:120px;height:120px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border2)}
+.img-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.upload-progress{width:100%;height:4px;background:var(--bg4);border-radius:2px;margin-top:8px;overflow:hidden;display:none}
+.upload-progress-bar{height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width .3s}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px 18px;font-size:14px;display:flex;align-items:center;gap:10px;min-width:240px;animation:slideIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:all}
+.toast.success{border-color:rgba(46,204,113,.4)}.toast.error{border-color:rgba(255,71,87,.4)}
+@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* CHAT */
+.chat-widget{position:fixed;bottom:24px;right:24px;z-index:200}
+.chat-fab{width:54px;height:54px;background:linear-gradient(135deg,#25D366,#128C7E);border:none;border-radius:50%;cursor:pointer;font-size:24px;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.chat-fab:hover{transform:scale(1.08)}
+.chat-popup{position:absolute;bottom:70px;right:0;width:290px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7);display:none}
+.chat-popup.open{display:block}
+.chat-head{background:linear-gradient(135deg,#25D366,#128C7E);padding:16px;display:flex;align-items:center;gap:10px}
+.chat-head-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px}
+.chat-head-name{font-weight:600;font-size:15px;color:#fff}.chat-head-status{font-size:12px;color:rgba(255,255,255,.85)}
+.chat-close{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:18px;margin-left:auto}
+.chat-body{padding:16px}
+.chat-msg{background:var(--bg3);border-radius:8px 8px 8px 2px;padding:10px 12px;font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.chat-actions{padding:0 16px 16px;display:flex;flex-direction:column;gap:8px}
+.chat-action-btn{padding:9px 14px;border:1px solid var(--border2);background:none;color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all .2s;text-align:left}
+.chat-action-btn:hover{border-color:#25D366;color:#25D366;background:rgba(37,211,102,.06)}
+
+/* BACK BTN */
+.back-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;display:inline-flex;align-items:center;gap:6px;transition:all .2s;margin-bottom:24px}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .nav-links{display:none}
+  .hero{padding:60px 16px}.hero-stats{gap:20px}
+  .section{padding:60px 16px}
+  .newsletter{padding:40px 20px}
+  .cart-page,.product-detail,.payment-page,.admin-page{padding:32px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo" onclick="navigate('home')">LUGAITCG</span>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-home"    onclick="navigate('home')">Home</button>
+    <button class="nav-link"        id="nav-shop"    onclick="navigate('shop')">Shop</button>
+    <button class="nav-link"        id="nav-pokemon" onclick="navigate('pokemon')">Pokémon</button>
+    <button class="nav-link"        id="nav-sports"  onclick="navigate('sports')">Sports</button>
+    <button class="nav-link"        id="nav-graded"  onclick="navigate('graded')">Graded</button>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-admin" onclick="navigate('admin')">⚙ Admin</button>
+    <button class="btn-cart"  onclick="navigate('cart')">
+      🛒 Cart<span class="cart-badge" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<div class="toast-container" id="toasts"></div>
+
+<!-- CHAT -->
+<div class="chat-widget">
+  <div class="chat-popup" id="chat-popup">
+    <div class="chat-head">
+      <div class="chat-head-avatar">💬</div>
+      <div><div class="chat-head-name">LugaiTCG Support</div><div class="chat-head-status">● Online now</div></div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-body"><div class="chat-msg">👋 Hi! How can we help you today? We reply in minutes.</div></div>
+    <div class="chat-actions">
+      <button class="chat-action-btn" onclick="openWA('Hello, I need help completing a payment for my order.')">💳 Payment help</button>
+      <button class="chat-action-btn" onclick="openWA('Hello, I have a question about my order status.')">📦 Order status</button>
+      <button class="chat-action-btn" onclick="openWA('Hello, I have a question about a product.')">🃏 Product question</button>
+    </div>
+  </div>
+  <button class="chat-fab" onclick="toggleChat()">💬</button>
+</div>
+
+<!-- ADMIN LOGIN OVERLAY -->
+<div id="admin-login-overlay" style="display:none">
+  <div class="admin-login-box">
+    <span class="logo">LUGAITCG</span>
+    <div class="admin-login-title">ADMIN ACCESS</div>
+    <div class="admin-login-sub">Sign in with your admin account.</div>
+    <div class="form-group" style="text-align:left">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="admin-email" type="email" placeholder="admin@lugaitcg.com" autocomplete="email">
+    </div>
+    <div class="form-group" style="text-align:left">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="admin-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <div class="admin-login-error" id="admin-login-err"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doAdminLogin()" id="login-btn">Sign In →</button>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="closeAdminLogin()">← Back to Store</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-bg"></div><div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🏆 America's Premier Trading Card Store</div>
+      <h1>THE VAULT<br>FOR <span>RARE</span><br>COLLECTORS</h1>
+      <p>Authentic Pokémon cards, sports cards, graded collectibles, booster boxes and accessories — every card verified, every deal secured.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="navigate('shop')">🛒 Shop Now</button>
+        <button class="btn btn-outline" onclick="scrollTo_('categories-section')">Browse Categories</button>
+        <button class="btn btn-ghost"   onclick="openChat()">💬 Contact Support</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num">2,400+</div><div class="stat-label">Products Listed</div></div>
+        <div class="stat-item"><div class="stat-num">5,800+</div><div class="stat-label">Happy Collectors</div></div>
+        <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Authenticated</div></div>
+        <div class="stat-item"><div class="stat-num">5★</div><div class="stat-label">Avg. Rating</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="categories-section">
+    <div class="section-header">
+      <div class="section-label">// Browse</div>
+      <div class="section-title">ALL CATEGORIES</div>
+      <div class="section-sub">Find exactly what you're looking for from our full collection.</div>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="navigate('pokemon')"><span class="cat-icon">⚡</span><div class="cat-name">Pokémon Cards</div><div class="cat-count">480+ items</div></div>
+      <div class="cat-card" onclick="navigate('sports')"><span class="cat-icon">🏀</span><div class="cat-name">Sports Cards</div><div class="cat-count">320+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Booster')"><span class="cat-icon">📦</span><div class="cat-name">Booster Boxes</div><div class="cat-count">95+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Sealed')"><span class="cat-icon">🔒</span><div class="cat-name">Sealed Products</div><div class="cat-count">140+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Singles')"><span class="cat-icon">🃏</span><div class="cat-name">Singles</div><div class="cat-count">1,200+ items</div></div>
+      <div class="cat-card" onclick="navigate('graded')"><span class="cat-icon">🏅</span><div class="cat-name">Graded Cards</div><div class="cat-count">65+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Accessories')"><span class="cat-icon">🛡️</span><div class="cat-name">Accessories</div><div class="cat-count">200+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Sleeves')"><span class="cat-icon">✨</span><div class="cat-name">Sleeves</div><div class="cat-count">80+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Deck Boxes')"><span class="cat-icon">📚</span><div class="cat-name">Deck Boxes</div><div class="cat-count">55+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Rare')"><span class="cat-icon">💎</span><div class="cat-name">Rare Collectibles</div><div class="cat-count">30+ items</div></div>
+      <div class="cat-card" onclick="filterShop('new')"><span class="cat-icon">🆕</span><div class="cat-name">New Arrivals</div><div class="cat-count">45 this week</div></div>
+      <div class="cat-card" onclick="filterShop('sale')"><span class="cat-icon">🔥</span><div class="cat-name">Sale Items</div><div class="cat-count">Save up to 40%</div></div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg2);padding:80px 0">
+    <div class="section" style="padding-top:0;padding-bottom:0">
+      <div class="section-header">
+        <div class="section-label">// Hot Right Now</div>
+        <div class="section-title">FEATURED PRODUCTS</div>
+        <div class="section-sub">Trending cards, new arrivals and best sellers picked by our team.</div>
+      </div>
+      <div id="featured-products"><div class="fb-loading"><div class="spinner"></div><p style="color:var(--text3)">Loading products…</p></div></div>
+      <div style="text-align:center;margin-top:32px"><button class="btn btn-outline" onclick="navigate('shop')">View All Products →</button></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">// Trust</div><div class="section-title">WHY LUGAITCG?</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">🔐</div><div class="feature-title">100% Authentic</div><div class="feature-desc">Every card verified and authenticated. Zero counterfeits, guaranteed.</div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Fast Support</div><div class="feature-desc">Live chat & WhatsApp support 7 days a week. Responses in minutes.</div></div>
+      <div class="feature-card"><div class="feature-icon">🚚</div><div class="feature-title">Secure Shipping</div><div class="feature-desc">Cards shipped in protective cases and tracked packaging. Mint condition guaranteed.</div></div>
+      <div class="feature-card"><div class="feature-icon">💎</div><div class="feature-title">Premium Selection</div><div class="feature-desc">Curated inventory featuring the rarest pulls and most sought-after sets.</div></div>
+      <div class="feature-card"><div class="feature-icon">🏪</div><div class="feature-title">US-Based Business</div><div class="feature-desc">Proudly operating across the United States, serving collectors nationwide.</div></div>
+      <div class="feature-card"><div class="feature-icon">↩️</div><div class="feature-title">Easy Returns</div><div class="feature-desc">Not satisfied? Our hassle-free 30-day return policy has you covered.</div></div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg2);padding:80px 0">
+    <div class="section" style="padding-top:0;padding-bottom:0">
+      <div class="section-header"><div class="section-label">// Reviews</div><div class="section-title">COLLECTORS LOVE US</div></div>
+      <div class="reviews-grid">
+        <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Ordered a PSA 10 Charizard and it arrived perfectly packaged. The best card shop experience I've had. LugaiTCG is the real deal."</div><div class="reviewer"><div class="reviewer-avatar">AK</div><div><div class="reviewer-name">Alex K.</div><div class="reviewer-location">New York, NY</div></div></div></div>
+        <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Got two booster boxes for an incredible price. Fast support helped me choose the right set. Will definitely be back — these guys know their cards."</div><div class="reviewer"><div class="reviewer-avatar" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark))">ML</div><div><div class="reviewer-name">Marcus L.</div><div class="reviewer-location">Los Angeles, CA</div></div></div></div>
+        <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Incredible graded card selection. Trustworthy, knowledgeable and fast. Highest recommendation to any serious collector out there!"</div><div class="reviewer"><div class="reviewer-avatar" style="background:linear-gradient(135deg,#FF4757,#7B5CF0)">JF</div><div><div class="reviewer-name">Jessica F.</div><div class="reviewer-location">Chicago, IL</div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="newsletter">
+      <h2>🃏 JOIN THE VAULT</h2>
+      <p>Get first access to rare drops, restock alerts and exclusive deals. No spam, ever.</p>
+      <div class="newsletter-form">
+        <input class="newsletter-input" type="email" id="nl-email" placeholder="your@email.com">
+        <button class="btn btn-primary" onclick="subscribeNewsletter()">Subscribe</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="logo">LUGAITCG</span>
+        <p>America's premier destination for authentic trading cards and collectibles. Serving collectors nationwide.</p>
+        <div class="socials">
+          <button class="social-btn" onclick="openWA('')">📱</button>
+          <button class="social-btn">📘</button>
+          <button class="social-btn">📸</button>
+          <button class="social-btn">🐦</button>
+        </div>
+      </div>
+      <div class="footer-col"><h4>SHOP</h4>
+        <a onclick="navigate('shop')">All Products</a>
+        <a onclick="navigate('pokemon')">Pokémon Cards</a>
+        <a onclick="navigate('sports')">Sports Cards</a>
+        <a onclick="navigate('graded')">Graded Cards</a>
+        <a onclick="filterShop('sale')">Sale Items</a>
+      </div>
+      <div class="footer-col"><h4>SUPPORT</h4>
+        <a onclick="openChat()">Live Chat</a>
+        <a onclick="openWA('Hello, I have a question.')">WhatsApp</a>
+        <a href="mailto:support@lugaitcg.com">Email Us</a>
+        <a>Track Order</a><a>FAQ</a>
+      </div>
+      <div class="footer-col"><h4>POLICIES</h4>
+        <a>Shipping Policy</a><a>Return Policy (30 days)</a>
+        <a>Privacy Policy</a><a>Terms &amp; Conditions</a>
+      </div>
+      <div class="footer-col"><h4>CONTACT</h4>
+        <a href="mailto:support@lugaitcg.com">📧 support@lugaitcg.com</a>
+        <a onclick="openWA('')">📱 WhatsApp Support</a>
+        <a>📍 United States</a>
+        <a>🕐 Mon–Sun: 9am–9pm ET</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 LugaiTCG. All rights reserved.</p>
+      <p>Secure payments · Authenticated products · Fast shipping</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════ SHOP PAGE ══ -->
+<div class="page" id="page-shop">
+  <div class="shop-header">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;margin-bottom:8px">THE SHOP</h1>
+    <p style="color:var(--text2);margin-bottom:28px">Browse our full collection of authentic trading cards and collectibles.</p>
+    <div class="shop-controls">
+      <div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="shop-search" placeholder="Search products…" oninput="renderShop()"></div>
+      <select class="filter-select" id="cat-filter" onchange="renderShop()">
+        <option value="">All Categories</option>
+        <option>Pokémon</option><option>Sports</option><option>Booster</option><option>Sealed</option>
+        <option>Singles</option><option>Graded</option><option>Accessories</option><option>Sleeves</option><option>Deck Boxes</option><option>Rare</option>
+      </select>
+      <select class="filter-select" id="price-filter" onchange="renderShop()">
+        <option value="">All Prices</option>
+        <option value="0-25">Under $25</option><option value="25-100">$25–$100</option>
+        <option value="100-500">$100–$500</option><option value="500+">$500+</option>
+      </select>
+      <select class="filter-select" id="sort-filter" onchange="renderShop()">
+        <option value="newest">Newest</option><option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option><option value="popular">Most Popular</option>
+      </select>
+      <button class="filter-btn" id="btn-sale" onclick="toggleSale()">🔥 On Sale</button>
+    </div>
+    <div id="shop-results-info" style="font-size:13px;color:var(--text3);margin-bottom:16px"></div>
+  </div>
+  <div style="padding:0 24px 80px;max-width:1200px;margin:0 auto"><div class="products-grid" id="shop-products"><div class="fb-loading"><div class="spinner"></div><p style="color:var(--text3)">Loading…</p></div></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════ POKÉMON PAGE ══ -->
+<div class="page" id="page-pokemon">
+  <div class="shop-header">
+    <button class="back-btn" onclick="navigate('home')">← Back</button>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px"><span style="font-size:48px">⚡</span><h1 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px">POKÉMON CARDS</h1></div>
+    <p style="color:var(--text2);margin-bottom:28px">Authentic Pokémon TCG — singles, packs, booster boxes and sealed sets.</p>
+    <div class="shop-controls">
+      <div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="poke-search" placeholder="Search Pokémon…" oninput="renderCatPage('Pokémon')"></div>
+      <select class="filter-select" id="poke-sort" onchange="renderCatPage('Pokémon')"><option value="newest">Newest</option><option value="price-asc">Price ↑</option><option value="price-desc">Price ↓</option></select>
+    </div>
+  </div>
+  <div style="padding:0 24px 80px;max-width:1200px;margin:0 auto"><div class="products-grid" id="pokemon-products"></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════ SPORTS PAGE ══ -->
+<div class="page" id="page-sports">
+  <div class="shop-header">
+    <button class="back-btn" onclick="navigate('home')">← Back</button>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px"><span style="font-size:48px">🏀</span><h1 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px">SPORTS CARDS</h1></div>
+    <p style="color:var(--text2);margin-bottom:28px">NBA, NFL, MLB, FIFA and more — authentic sports trading cards.</p>
+    <div class="shop-controls">
+      <div class="search-box"><span class="search-icon">🔍</span><input class="search-input" id="sports-search" placeholder="Search sports…" oninput="renderCatPage('Sports')"></div>
+      <select class="filter-select" id="sports-sort" onchange="renderCatPage('Sports')"><option value="newest">Newest</option><option value="price-asc">Price ↑</option><option value="price-desc">Price ↓</option></select>
+    </div>
+  </div>
+  <div style="padding:0 24px 80px;max-width:1200px;margin:0 auto"><div class="products-grid" id="sports-products"></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════ GRADED PAGE ══ -->
+<div class="page" id="page-graded">
+  <div class="shop-header">
+    <button class="back-btn" onclick="navigate('home')">← Back</button>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px"><span style="font-size:48px">🏅</span><h1 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px">GRADED CARDS</h1></div>
+    <p style="color:var(--text2);margin-bottom:28px">PSA, BGS and CGC certified graded cards — investment-grade collectibles.</p>
+  </div>
+  <div style="padding:0 24px 80px;max-width:1200px;margin:0 auto"><div class="products-grid" id="graded-products"></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════ PRODUCT DETAIL PAGE ══ -->
+<div class="page" id="page-product">
+  <div class="product-detail">
+    <button class="back-btn" id="product-back-btn">← Back</button>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-img-main" id="detail-img"><span style="font-size:80px">🃏</span></div>
+        <div class="detail-thumbs" id="detail-thumbs"></div>
+      </div>
+      <div>
+        <div class="detail-brand" id="detail-brand">LUGAITCG</div>
+        <div class="detail-title" id="detail-title">Product</div>
+        <div class="detail-price-row">
+          <div class="detail-price" id="detail-price">$0.00</div>
+          <div class="detail-old-price" id="detail-old-price"></div>
+        </div>
+        <div class="detail-badges" id="detail-badges"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+        <div class="qty-row">
+          <span class="qty-label">Quantity:</span>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-num" id="detail-qty">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-primary" onclick="addCurrentToCart()">🛒 Add to Cart</button>
+          <button class="btn btn-outline" onclick="addCurrentToCart();navigate('cart')">⚡ Buy Now</button>
+          <button class="btn btn-ghost"   onclick="openChat()">💬 Ask Support</button>
+        </div>
+        <div class="detail-specs" id="detail-specs"></div>
+      </div>
+    </div>
+    <div style="margin-top:60px">
+      <div class="section-label" style="margin-bottom:12px">// You May Also Like</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:24px">RELATED PRODUCTS</div>
+      <div class="products-grid" id="related-products"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ CART PAGE ══ -->
+<div class="page" id="page-cart">
+  <div class="cart-page">
+    <div class="cart-title">YOUR CART 🛒</div>
+    <div id="cart-empty" style="display:none">
+      <div class="empty-state">
+        <div class="empty-icon">🛒</div>
+        <div class="empty-title">YOUR CART IS EMPTY</div>
+        <div class="empty-sub">Looks like you haven't added anything yet.</div>
+        <button class="btn btn-primary" onclick="navigate('shop')">Browse Products</button>
+      </div>
+    </div>
+    <div id="cart-content" style="display:none">
+      <div class="cart-layout">
+        <div><div class="cart-items" id="cart-items-list"></div></div>
+        <div class="cart-order-panel">
+          <div class="panel-title">📋 Customer Details</div>
+          <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="c-name" placeholder="Jane Smith"></div>
+          <div class="form-group"><label class="form-label">Email Address *</label><input class="form-input" id="c-email" type="email" placeholder="jane@email.com"></div>
+          <div class="form-group"><label class="form-label">Phone Number *</label><input class="form-input" id="c-phone" placeholder="+1 (555) 000-0000"></div>
+          <div class="form-group"><label class="form-label">Shipping Address *</label><input class="form-input" id="c-address" placeholder="123 Main St, Apt 4B"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">City *</label><input class="form-input" id="c-city" placeholder="New York"></div>
+            <div class="form-group"><label class="form-label">State *</label><input class="form-input" id="c-state" placeholder="NY"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">ZIP Code *</label><input class="form-input" id="c-zip" placeholder="10001"></div>
+            <div class="form-group"><label class="form-label">Country</label><input class="form-input" id="c-country" value="United States"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Additional Notes</label><input class="form-input" id="c-notes" placeholder="Delivery instructions, gift message…"></div>
+
+          <!-- DISCOUNT CODE -->
+          <div class="form-group">
+            <label class="form-label">Discount Code</label>
+            <div class="discount-row">
+              <input class="form-input" id="c-discount" placeholder="Enter code…" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+              <button onclick="applyDiscount()">Apply</button>
+            </div>
+            <div class="discount-applied" id="discount-ok">✅ <span id="discount-msg"></span></div>
+            <div class="discount-error"   id="discount-err">❌ Invalid or expired code.</div>
+          </div>
+
+          <div class="order-total">
+            <div class="total-row"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+            <div class="total-discount-row" id="discount-row" style="display:none"><span id="discount-label">Discount</span><span id="discount-amt">-$0.00</span></div>
+            <div class="total-row"><span>Shipping</span><span style="color:var(--green)">Calculated at checkout</span></div>
+            <div class="total-final"><span>TOTAL</span><span id="cart-total">$0.00</span></div>
+          </div>
+
+          <button class="btn btn-primary btn-checkout" onclick="submitOrder()" id="checkout-btn">Proceed to Payment →</button>
+          <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:10px">🔒 Secure checkout — your info is never shared</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PAYMENT PAGE ══ -->
+<div class="page" id="page-payment">
+  <div class="payment-page">
+    <div class="payment-title">COMPLETE PAYMENT</div>
+    <div class="payment-sub">Order received! Reference: <span id="order-ref" style="font-family:'JetBrains Mono',monospace;color:var(--gold)"></span></div>
+    <div class="payment-tabs">
+      <button class="payment-tab active" onclick="switchPayTab('btc',this)">₿ Bitcoin</button>
+      <button class="payment-tab" onclick="switchPayTab('other',this)">💬 Other Method</button>
+    </div>
+
+    <div class="payment-panel active" id="pay-btc">
+      <div class="payment-card">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin-bottom:6px">₿ BITCOIN PAYMENT</h3>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Send the exact order total in BTC to the address below. BTC network only.</p>
+        <div class="qr-box">📱</div>
+        <p style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:6px;font-family:'JetBrains Mono',monospace">BTC WALLET ADDRESS</p>
+        <div class="crypto-address">
+          <!-- ⚠️ Replace with your real BTC wallet address -->
+          <span id="btc-addr">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+          <button class="copy-btn" onclick="copyEl('btc-addr','BTC address')">Copy</button>
+        </div>
+        <div class="pay-instructions">
+          <strong>How to pay:</strong><br>
+          1. Open your Bitcoin wallet (Coinbase, Trust Wallet, etc.)<br>
+          2. Send the <strong>exact order total</strong> in BTC to the address above<br>
+          3. Screenshot your transaction hash / confirmation<br>
+          4. Email proof to <strong>support@lugaitcg.com</strong> with your order reference<br>
+          5. Order confirmed within 1–2 hours of payment verification
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center" onclick="openWA('Hello! I just sent a Bitcoin payment for my LugaiTCG order. My reference is: ')">📱 Send Payment Proof via WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="payment-panel" id="pay-other">
+      <div class="payment-card" style="text-align:center;padding:48px 32px">
+        <div style="font-size:64px;margin-bottom:20px">💬</div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:10px">NEED ANOTHER WAY?</h3>
+        <p style="color:var(--text2);font-size:15px;line-height:1.6;margin-bottom:28px">Contact our support team and we'll find a payment solution — PayPal, CashApp, Venmo and more.</p>
+        <button class="btn btn-primary" style="font-size:16px;padding:14px 36px;justify-content:center" onclick="openWA('Hello! I would like to discuss payment options for my LugaiTCG order.')">💬 Chat with Support Now</button>
+        <p style="color:var(--text3);font-size:13px;margin-top:16px">Available Mon–Sun: 9am–9pm ET</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ ADMIN PAGE ══ -->
+<div class="page" id="page-admin">
+  <div class="admin-page">
+    <div class="admin-header">
+      <div>
+        <div class="admin-title">⚙ ADMIN DASHBOARD</div>
+        <div id="admin-user-bar" class="admin-user-bar" style="display:none">
+          <span id="admin-user-email"></span>
+          <button class="admin-logout-btn" onclick="doAdminLogout()">Sign Out</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="navigate('home')">← Back to Store</button>
+        <button class="btn btn-primary" onclick="showAddForm()">+ Add Product</button>
+      </div>
+    </div>
+    <div class="admin-stats" id="admin-stats"></div>
+    <div id="add-form-container"></div>
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:16px">All Products</h3>
+    <div style="overflow-x:auto">
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════
+// 0.  CONFIGURATION  ← fill these in
+// ════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB4eWC38ivRK7ZyXdTX9COeslOO4v1RTpQ",
+  authDomain:        "lugai-5ff2d.firebaseapp.com",
+  projectId:         "lugai-5ff2d",
+  storageBucket:     "lugai-5ff2d.firebasestorage.app",
+  messagingSenderId: "1092136851276",
+  appId:             "1:1092136851276:web:d0845745e85e55dffba1e9"
+};
+
+const EMAILJS_SERVICE_ID  = 'LugaiTCG';
+const EMAILJS_TEMPLATE_ID = 'template_37u6kwg';
+const EMAILJS_PUBLIC_KEY  = 'HlDY0J7_kCIOuXycZ';
+
+const WA_NUMBER = '6892890743'; // US format, no + or spaces
+
+// Discount codes: { CODE: { pct: 10, label: '10% off' } }
+const DISCOUNT_CODES = {
+  'LUGAI10':  { pct: 10,  label: '10% off — Welcome discount' },
+  'RARE20':   { pct: 20,  label: '20% off — Rare collector deal' },
+  'VAULT15':  { pct: 15,  label: '15% off — Vault member code'  },
+};
+
+// ════════════════════════════════════════════
+// 1.  FIREBASE INIT
+// ════════════════════════════════════════════
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth    = firebase.auth();
+const db      = firebase.firestore();
+const storage = firebase.storage();
+
+// Cache loaded products in memory
+let products = [];
+let productsLoaded = false;
+
+async function loadProducts(){
+  try {
+    const snap = await db.collection('products').orderBy('createdAt','desc').get();
+    products = snap.docs.map(d=>({id:d.id,...d.data()}));
+    productsLoaded = true;
+    return products;
+  } catch(e){
+    // Firebase not configured yet — return empty array silently
+    console.warn('Firebase not configured. Running in demo mode.');
+    products = [];
+    productsLoaded = true;
+    return products;
+  }
+}
+
+// ════════════════════════════════════════════
+// 2.  STATE
+// ════════════════════════════════════════════
+let cart           = [];
+let wishlist       = [];
+let currentProduct = null;
+let currentQty     = 1;
+let fromPage       = 'shop';
+let saleFilter     = false;
+let appliedDiscount = null; // { code, pct, label }
+
+// ════════════════════════════════════════════
+// 3.  HELPERS
+// ════════════════════════════════════════════
+const fmt = p => '$' + Number(p).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+
+function toast(type, msg){
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast '+type; t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3800);
+}
+
+function copyEl(id, label){
+  navigator.clipboard?.writeText(document.getElementById(id).textContent).catch(()=>{});
+  toast('success', label+' copied!');
+}
+
+function openWA(msg){
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+function imgTag(p, cls=''){
+  if(p.img) return `<img src="${p.img}" alt="${p.name}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">`;
+  return `<span class="img-ph">🃏</span>`;
+}
+
+// ════════════════════════════════════════════
+// 4.  NAVIGATION
+// ════════════════════════════════════════════
+async function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+page)?.classList.add('active');
+  document.getElementById('nav-'+page)?.classList.add('active');
+  window.scrollTo(0,0);
+
+  // Ensure products are loaded before rendering any product page
+  if(!productsLoaded) await loadProducts();
+
+  if(page==='shop')    renderShop();
+  if(page==='pokemon') renderCatPage('Pokémon');
+  if(page==='sports')  renderCatPage('Sports');
+  if(page==='graded')  renderCatPage('Graded');
+  if(page==='cart')    renderCart();
+  if(page==='payment') generateOrderRef();
+  if(page==='admin'){
+    // Gate: require Firebase Auth
+    if(!auth.currentUser){ showAdminLogin(); return; }
+    renderAdmin();
+  }
+}
+
+function scrollTo_(id){
+  navigate('home');
+  setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'}),80);
+}
+
+// ════════════════════════════════════════════
+// 5.  PRODUCT CARD
+// ════════════════════════════════════════════
+const badgeMap = {rare:'badge-rare',new:'badge-new',sale:'badge-sale',limited:'badge-limited'};
+
+function productCard(p, origin){
+  const w = wishlist.includes(p.id);
+  return `<div class="product-card" onclick="openProduct('${p.id}','${origin}')">
+    <div class="product-img">
+      ${p.img
+        ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s" onerror="this.outerHTML='<span class=img-ph>🃏</span>'">`
+        : `<span class="img-ph">🃏</span>`}
+      ${p.badge?`<span class="product-badge ${badgeMap[p.badge]||''}">${p.badge.toUpperCase()}</span>`:''}
+      <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish('${p.id}')" style="color:${w?'#FF4757':'var(--text2)'}" title="Wishlist">♥</button>
+    </div>
+    <div class="product-info">
+      <div class="product-name">${p.name}</div>
+      <div class="product-category">${p.cat}</div>
+      <div class="product-footer">
+        <div>
+          <div class="product-price">${fmt(p.price)}${p.oldPrice?`<small>${fmt(p.oldPrice)}</small>`:''}</div>
+          <div style="font-size:11px;margin-top:2px;color:${p.stock==='In Stock'?'var(--green)':p.stock==='Low Stock'?'var(--red)':'var(--text3)'}">${p.stock}</div>
+        </div>
+        <button class="btn-add" onclick="event.stopPropagation();addToCart('${p.id}')">+ Cart</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function noProducts(){
+  return `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">NO PRODUCTS FOUND</div><div class="empty-sub">Try adjusting your filters, or check back soon.</div></div>`;
+}
+
+// ════════════════════════════════════════════
+// 6.  RENDER PAGES
+// ════════════════════════════════════════════
+async function renderFeatured(){
+  const el = document.getElementById('featured-products');
+  if(!productsLoaded) await loadProducts();
+  const featured = products.filter(p=>p.featured).slice(0,8);
+  const show = featured.length ? featured : products.slice(0,8);
+  el.innerHTML = show.length ? show.map(p=>productCard(p,'home')).join('') : '<p style="color:var(--text3);padding:20px">No products yet. Add some from the admin panel.</p>';
+}
+
+function renderShop(){
+  const q     = (document.getElementById('shop-search')?.value||'').toLowerCase();
+  const cat   = document.getElementById('cat-filter')?.value||'';
+  const price = document.getElementById('price-filter')?.value||'';
+  const sort  = document.getElementById('sort-filter')?.value||'newest';
+
+  let list = products.filter(p=>{
+    const mq  = !q || p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q);
+    const mc  = !cat  || p.cat.toLowerCase().includes(cat.toLowerCase());
+    const ms  = !saleFilter || p.oldPrice;
+    const mbadge = !cat || !['new','sale'].includes(cat) ? true : p.badge===cat;
+    let   mp  = true;
+    if(price==='0-25')    mp = p.price < 25;
+    if(price==='25-100')  mp = p.price >= 25 && p.price <= 100;
+    if(price==='100-500') mp = p.price > 100 && p.price <= 500;
+    if(price==='500+')    mp = p.price > 500;
+    return mq && mc && ms && mp;
+  });
+
+  if(sort==='price-asc')  list.sort((a,b)=>a.price-b.price);
+  if(sort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  if(sort==='popular')    list.sort((a,b)=>(b.stockCount||0)-(a.stockCount||0));
+
+  document.getElementById('shop-results-info').textContent = `Showing ${list.length} product${list.length!==1?'s':''}`;
+  document.getElementById('shop-products').innerHTML = list.length ? list.map(p=>productCard(p,'shop')).join('') : noProducts();
+}
+
+function renderCatPage(cat){
+  const pageId  = cat==='Pokémon'?'pokemon-products':cat==='Sports'?'sports-products':'graded-products';
+  const searchId = cat==='Pokémon'?'poke-search':cat==='Sports'?'sports-search':null;
+  const sortId   = cat==='Pokémon'?'poke-sort':cat==='Sports'?'sports-sort':null;
+  const q   = searchId ? (document.getElementById(searchId)?.value||'').toLowerCase() : '';
+  const srt = sortId   ? (document.getElementById(sortId)?.value||'newest') : 'newest';
+  let list = products.filter(p=>p.cat===cat && (!q||p.name.toLowerCase().includes(q)));
+  if(srt==='price-asc')  list.sort((a,b)=>a.price-b.price);
+  if(srt==='price-desc') list.sort((a,b)=>b.price-a.price);
+  const el = document.getElementById(pageId);
+  if(el) el.innerHTML = list.length ? list.map(p=>productCard(p,cat.toLowerCase())).join('') : noProducts();
+}
+
+function filterShop(val){
+  navigate('shop');
+  setTimeout(()=>{
+    const cf = document.getElementById('cat-filter');
+    const cats = ['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Sleeves','Deck Boxes','Rare'];
+    if(cats.find(c=>c.toLowerCase()===val.toLowerCase())){
+      if(cf){ cf.value=cats.find(c=>c.toLowerCase()===val.toLowerCase())||''; }
+    }
+    renderShop();
+  },60);
+}
+
+function toggleSale(){
+  saleFilter = !saleFilter;
+  document.getElementById('btn-sale').classList.toggle('active',saleFilter);
+  renderShop();
+}
+
+// ════════════════════════════════════════════
+// 7.  PRODUCT DETAIL
+// ════════════════════════════════════════════
+function openProduct(id, origin){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  currentProduct=p; currentQty=1; fromPage=origin||'shop';
+
+  document.getElementById('product-back-btn').onclick = ()=>navigate(fromPage);
+  document.getElementById('detail-img').innerHTML = p.img
+    ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:12px" onerror="this.outerHTML='<span style=font-size:80px>🃏</span>'">`
+    : `<span style="font-size:80px">🃏</span>`;
+  document.getElementById('detail-thumbs').innerHTML = [p.img,p.img,p.img].filter(Boolean).map((src,i)=>
+    `<div class="detail-thumb ${i===0?'active':''}" onclick="selectThumb(this,'${src}')"><img src="${src}" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML='🃏'"></div>`
+  ).join('');
+  document.getElementById('detail-brand').textContent  = (p.cat||'').toUpperCase()+' — LUGAITCG';
+  document.getElementById('detail-title').textContent  = p.name;
+  document.getElementById('detail-price').textContent  = fmt(p.price);
+  document.getElementById('detail-old-price').textContent = p.oldPrice ? fmt(p.oldPrice) : '';
+  document.getElementById('detail-qty').textContent    = '1';
+
+  document.getElementById('detail-badges').innerHTML = `
+    <span class="detail-badge ${p.stock==='In Stock'?'status-in':'status-low'}">${p.stock}</span>
+    ${p.badge?`<span class="detail-badge product-badge ${badgeMap[p.badge]||''}">${p.badge.toUpperCase()}</span>`:''}
+    ${p.condition?`<span class="detail-badge" style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2)">${p.condition}</span>`:''}
+  `;
+  document.getElementById('detail-desc').textContent  = p.desc||'';
+  document.getElementById('detail-specs').innerHTML   = `
+    <div class="spec-title">Card Specifications</div>
+    <div class="spec-row"><span class="spec-key">Category</span><span class="spec-val">${p.cat}</span></div>
+    <div class="spec-row"><span class="spec-key">Set / Edition</span><span class="spec-val">${p.set||'—'}</span></div>
+    <div class="spec-row"><span class="spec-key">Rarity</span><span class="spec-val">${p.rarity||'—'}</span></div>
+    <div class="spec-row"><span class="spec-key">Condition</span><span class="spec-val">${p.condition||'—'}</span></div>
+    <div class="spec-row"><span class="spec-key">Units In Stock</span><span class="spec-val">${p.stockCount||'—'}</span></div>
+    <div class="spec-row"><span class="spec-key">Authenticity</span><span class="spec-val">Verified ✓</span></div>
+  `;
+  document.getElementById('related-products').innerHTML =
+    products.filter(r=>r.cat===p.cat && r.id!==p.id).slice(0,4).map(r=>productCard(r,'product')).join('');
+
+  navigate('product');
+}
+
+function selectThumb(el, src){
+  document.querySelectorAll('.detail-thumb').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('detail-img').innerHTML =
+    `<img src="${src}" style="width:100%;height:100%;object-fit:contain;padding:12px">`;
+}
+
+function changeQty(d){
+  currentQty = Math.max(1, Math.min(currentQty+d, currentProduct?.stockCount||99));
+  document.getElementById('detail-qty').textContent = currentQty;
+}
+
+function addCurrentToCart(){
+  if(!currentProduct) return;
+  for(let i=0;i<currentQty;i++) addToCart(currentProduct.id, true);
+  toast('success',`✅ Added ${currentQty}× to cart!`);
+}
+
+// ════════════════════════════════════════════
+// 8.  CART
+// ════════════════════════════════════════════
+function addToCart(id, silent){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const ex = cart.find(c=>c.id===id);
+  if(ex) ex.qty++; else cart.push({id,name:p.name,price:p.price,img:p.img||'',cat:p.cat,qty:1});
+  updateCartBadge();
+  if(!silent) toast('success',`✅ ${p.name.split(' ').slice(0,3).join(' ')}… added!`);
+}
+
+function removeFromCart(id){ cart=cart.filter(c=>c.id!==id); updateCartBadge(); renderCart(); }
+
+function updateCartItemQty(id,d){
+  const item=cart.find(c=>c.id===id); if(!item) return;
+  item.qty=Math.max(1,item.qty+d); renderCart();
+}
+
+function updateCartBadge(){
+  document.getElementById('cart-count').textContent = cart.reduce((s,c)=>s+c.qty,0);
+}
+
+function cartSubtotal(){ return cart.reduce((s,c)=>s+c.price*c.qty,0); }
+
+function renderCart(){
+  const empty = cart.length===0;
+  document.getElementById('cart-empty').style.display   = empty?'block':'none';
+  document.getElementById('cart-content').style.display = empty?'none':'block';
+  if(empty) return;
+
+  document.getElementById('cart-items-list').innerHTML = cart.map(c=>`
+    <div class="cart-item">
+      <div class="cart-item-img">
+        ${c.img?`<img src="${c.img}" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='🃏'">`:'🃏'}
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${c.name}</div>
+        <div class="cart-item-cat">${c.cat}</div>
+        <div class="cart-item-price">${fmt(c.price)} each</div>
+      </div>
+      <div class="cart-item-actions">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="updateCartItemQty('${c.id}',-1)">−</button>
+          <span class="qty-num">${c.qty}</span>
+          <button class="qty-btn" onclick="updateCartItemQty('${c.id}',1)">+</button>
+        </div>
+        <span style="color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:60px">${fmt(c.price*c.qty)}</span>
+        <button onclick="removeFromCart('${c.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px" title="Remove">🗑</button>
+      </div>
+    </div>
+  `).join('');
+  updateCartTotals();
+}
+
+function updateCartTotals(){
+  const sub  = cartSubtotal();
+  const disc = appliedDiscount ? sub*(appliedDiscount.pct/100) : 0;
+  const total= sub - disc;
+  document.getElementById('cart-subtotal').textContent = fmt(sub);
+  document.getElementById('cart-total').textContent    = fmt(total);
+  const dRow = document.getElementById('discount-row');
+  if(appliedDiscount){
+    dRow.style.display='flex';
+    document.getElementById('discount-label').textContent = `${appliedDiscount.pct}% off (${appliedDiscount.code})`;
+    document.getElementById('discount-amt').textContent   = '-'+fmt(disc);
+  } else {
+    dRow.style.display='none';
+  }
+}
+
+// ════════════════════════════════════════════
+// 9.  DISCOUNT CODES
+// ════════════════════════════════════════════
+function applyDiscount(){
+  const code = (document.getElementById('c-discount').value||'').trim().toUpperCase();
+  const ok   = document.getElementById('discount-ok');
+  const err  = document.getElementById('discount-err');
+  ok.style.display='none'; err.style.display='none';
+
+  if(DISCOUNT_CODES[code]){
+    appliedDiscount = {code, ...DISCOUNT_CODES[code]};
+    document.getElementById('discount-msg').textContent = DISCOUNT_CODES[code].label;
+    ok.style.display='block';
+    updateCartTotals();
+    toast('success','🎉 Discount code applied!');
+  } else {
+    appliedDiscount = null;
+    err.style.display='block';
+    updateCartTotals();
+  }
+}
+
+function toggleWish(id){
+  if(wishlist.includes(id)) wishlist=wishlist.filter(w=>w!==id);
+  else wishlist.push(id);
+  toast('success', wishlist.includes(id)?'♥ Added to wishlist':'♡ Removed from wishlist');
+}
+
+// ════════════════════════════════════════════
+// 10. ORDER SUBMISSION
+// ════════════════════════════════════════════
+async function submitOrder(){
+  const name    = document.getElementById('c-name').value.trim();
+  const email   = document.getElementById('c-email').value.trim();
+  const phone   = document.getElementById('c-phone').value.trim();
+  const address = document.getElementById('c-address').value.trim();
+  const city    = document.getElementById('c-city').value.trim();
+  const state   = document.getElementById('c-state').value.trim();
+  const zip     = document.getElementById('c-zip').value.trim();
+  const country = document.getElementById('c-country').value.trim();
+  if(!name||!email||!phone||!address||!city||!state||!zip){
+    toast('error','⚠️ Please fill in all required fields.'); return;
+  }
+
+  const notes    = document.getElementById('c-notes').value.trim();
+  const sub      = cartSubtotal();
+  const disc     = appliedDiscount ? sub*(appliedDiscount.pct/100) : 0;
+  const total    = sub - disc;
+  const ref      = 'LT-'+Date.now();
+  const itemList = cart.map(c=>`• ${c.name} ×${c.qty} = ${fmt(c.price*c.qty)}`).join('\n');
+  const date     = new Date().toLocaleString('en-US',{timeZone:'America/New_York'});
+
+  const tpl = {
+    to_email:         'support@lugaitcg.com',
+    order_ref:         ref,
+    order_date:        date,
+    customer_name:     name,
+    customer_email:    email,
+    customer_phone:    phone,
+    shipping_address:  `${address}, ${city}, ${state} ${zip}, ${country}`,
+    order_notes:       notes||'None',
+    discount_code:     appliedDiscount ? `${appliedDiscount.code} (${appliedDiscount.pct}% off)` : 'None',
+    order_items:       itemList,
+    order_subtotal:    fmt(sub),
+    order_discount:    fmt(disc),
+    order_total:       fmt(total),
+  };
+
+  const btn = document.getElementById('checkout-btn');
+  btn.textContent='⏳ Processing…'; btn.disabled=true;
+
+  // Save order to Firestore
+  try {
+    await db.collection('orders').add({...tpl, cartItems: cart, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+  } catch(e){ console.warn('Firestore order save failed:', e); }
+
+  // EmailJS
+  if(typeof emailjs!=='undefined' && EMAILJS_SERVICE_ID!=='YOUR_SERVICE_ID'){
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, tpl, EMAILJS_PUBLIC_KEY)
+      .then(()=>toast('success','✅ Order confirmed!'))
+      .catch(()=>toast('error','Email send failed — contact support.'));
+  } else {
+    toast('success','✅ Order received! Redirecting…');
+  }
+
+  window._lastRef = ref;
+  setTimeout(()=>{ btn.textContent='Proceed to Payment →'; btn.disabled=false; navigate('payment'); },1400);
+}
+
+// ════════════════════════════════════════════
+// 11. PAYMENT
+// ════════════════════════════════════════════
+function switchPayTab(tab, el){
+  document.querySelectorAll('.payment-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.payment-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pay-'+tab).classList.add('active');
+  if(tab==='other') openChat();
+}
+
+function generateOrderRef(){
+  document.getElementById('order-ref').textContent = window._lastRef||'LT-'+Date.now();
+}
+
+// ════════════════════════════════════════════
+// 12. ADMIN AUTH (Firebase)
+// ════════════════════════════════════════════
+function showAdminLogin(){
+  document.getElementById('admin-login-overlay').style.display='flex';
+  setTimeout(()=>document.getElementById('admin-email').focus(),100);
+}
+
+function closeAdminLogin(){
+  document.getElementById('admin-login-overlay').style.display='none';
+  navigate('home');
+}
+
+async function doAdminLogin(){
+  const email = document.getElementById('admin-email').value.trim();
+  const pass  = document.getElementById('admin-pass').value;
+  const err   = document.getElementById('admin-login-err');
+  const btn   = document.getElementById('login-btn');
+  err.style.display='none';
+  btn.textContent='Signing in…'; btn.disabled=true;
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    document.getElementById('admin-login-overlay').style.display='none';
+    navigate('admin');
+  } catch(e){
+    err.textContent = e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+      ? 'Incorrect email or password.' : e.message;
+    err.style.display='block';
+    document.getElementById('admin-pass').value='';
+  } finally {
+    btn.textContent='Sign In →'; btn.disabled=false;
+  }
+}
+
+async function doAdminLogout(){
+  await auth.signOut();
+  toast('success','Signed out.');
+  navigate('home');
+}
+
+// Listen to auth state
+auth.onAuthStateChanged(user=>{
+  const bar   = document.getElementById('admin-user-bar');
+  const email = document.getElementById('admin-user-email');
+  if(user){ bar.style.display='flex'; email.textContent=user.email; }
+  else     { bar.style.display='none'; }
+});
+
+// ════════════════════════════════════════════
+// 13. ADMIN DASHBOARD
+// ════════════════════════════════════════════
+async function renderAdmin(){
+  // Reload fresh from Firestore
+  await loadProducts();
+
+  const total   = products.length;
+  const inStock = products.filter(p=>p.stock==='In Stock').length;
+  const low     = products.filter(p=>p.stock==='Low Stock').length;
+  const val     = products.reduce((s,p)=>s+Number(p.price),0);
+
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="admin-stat"><div class="admin-stat-num">${total}</div><div class="admin-stat-label">Total Products</div></div>
+    <div class="admin-stat"><div class="admin-stat-num">${inStock}</div><div class="admin-stat-label">In Stock</div></div>
+    <div class="admin-stat"><div class="admin-stat-num">${low}</div><div class="admin-stat-label">Low Stock Alerts</div></div>
+    <div class="admin-stat" style="background:rgba(201,168,76,.06);border-color:rgba(201,168,76,.15)">
+      <div class="admin-stat-num" style="font-size:18px">${fmt(val)}</div>
+      <div class="admin-stat-label">Inventory Value</div>
+    </div>
+  `;
+
+  document.getElementById('admin-tbody').innerHTML = products.map((p,i)=>`
+    <tr>
+      <td style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:12px">${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:44px;height:44px;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center">
+            ${p.img?`<img src="${p.img}" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='🃏'">`:'<span>🃏</span>'}
+          </div>
+          <div><div style="font-weight:500;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--text3)">${p.set||'—'}</div></div>
+        </div>
+      </td>
+      <td><span style="font-size:12px;padding:3px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--border)">${p.cat}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:13px">${fmt(p.price)}</td>
+      <td><span class="status-pill ${p.stock==='In Stock'?'stock-in':p.stock==='Low Stock'?'stock-low':'stock-out'}">${p.stock}</span></td>
+      <td>
+        <button class="action-btn" onclick="editProduct('${p.id}')">✏ Edit</button>
+        <button class="action-btn del" onclick="deleteProduct('${p.id}')">🗑 Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ════════════════════════════════════════════
+// 14. ADD / EDIT PRODUCT FORM
+// ════════════════════════════════════════════
+let _imgUploadFile = null;
+
+function showAddForm(prefill){
+  const p = prefill||{};
+  document.getElementById('add-form-container').innerHTML=`
+    <div class="add-product-form">
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:20px">${p.id?'✏️ Edit Product':'+ Add New Product'}</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="af-name" placeholder="e.g. Charizard VMAX" value="${p.name||''}"></div>
+        <div class="form-group"><label class="form-label">Category *</label>
+          <select class="form-input" id="af-cat">${['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Sleeves','Deck Boxes','Rare'].map(c=>`<option${p.cat===c?' selected':''}>${c}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Price (USD) *</label><input class="form-input" id="af-price" type="number" step="0.01" placeholder="9.99" value="${p.price||''}"></div>
+        <div class="form-group"><label class="form-label">Old / Original Price</label><input class="form-input" id="af-old" type="number" step="0.01" placeholder="19.99" value="${p.oldPrice||''}"></div>
+        <div class="form-group"><label class="form-label">Set / Edition</label><input class="form-input" id="af-set" placeholder="Sword & Shield" value="${p.set||''}"></div>
+        <div class="form-group"><label class="form-label">Rarity</label><input class="form-input" id="af-rarity" placeholder="Ultra Rare" value="${p.rarity||''}"></div>
+        <div class="form-group"><label class="form-label">Condition</label><input class="form-input" id="af-cond" placeholder="Near Mint" value="${p.condition||''}"></div>
+        <div class="form-group"><label class="form-label">Stock Status</label>
+          <select class="form-input" id="af-stock">${['In Stock','Low Stock','Out of Stock'].map(s=>`<option${p.stock===s?' selected':''}>${s}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Badge</label>
+          <select class="form-input" id="af-badge">${[['','None'],['new','New'],['rare','Rare'],['sale','Sale'],['limited','Limited']].map(([v,l])=>`<option value="${v}"${p.badge===v?' selected':''}>${l}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label class="form-label">Stock Count</label><input class="form-input" id="af-stock-count" type="number" placeholder="10" value="${p.stockCount||10}"></div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;padding-top:24px">
+          <input type="checkbox" id="af-featured" ${p.featured?'checked':''} style="width:16px;height:16px;cursor:pointer">
+          <label for="af-featured" class="form-label" style="margin:0;cursor:pointer">Show on Homepage</label>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:8px"><label class="form-label">Description</label>
+        <textarea class="form-input" id="af-desc" placeholder="Describe the product…" rows="3" style="resize:vertical">${p.desc||''}</textarea>
+      </div>
+
+      <!-- IMAGE UPLOAD -->
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Product Image</label>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+          <div class="img-upload-zone" id="upload-zone" onclick="document.getElementById('af-img-file').click()"
+               ondragover="event.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="handleImgDrop(event)">
+            <input type="file" id="af-img-file" accept="image/*" onchange="handleImgFile(this)">
+            <div style="font-size:32px">📁</div>
+            <p>Click or drag & drop<br><span style="font-size:11px;color:var(--text3)">JPG, PNG, WebP — max 5MB</span></p>
+          </div>
+          <div style="flex:1;min-width:180px">
+            <label class="form-label" style="margin-bottom:6px">Or paste image URL</label>
+            <input class="form-input" id="af-img-url" placeholder="https://…" oninput="previewUrl(this.value)" value="${p.img&&!p.img.startsWith('data:')?p.img:''}">
+          </div>
+        </div>
+        <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-bar"></div></div>
+        <div id="img-preview-area" style="${p.img?'':'display:none'};margin-top:12px">
+          <div class="img-preview-wrap">
+            <img id="img-preview-el" src="${p.img||''}" alt="Preview">
+            <button class="img-remove" onclick="clearImg()">✕</button>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:6px" id="img-src-label">${p.img?'Current image':''}  </p>
+        </div>
+      </div>
+      <input type="hidden" id="af-img-final" value="${p.img||''}">
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveProduct('${p.id||''}')">${p.id?'Update Product':'Save Product'}</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('add-form-container').innerHTML=''">Cancel</button>
+      </div>
+    </div>
+  `;
+  _imgUploadFile = null;
+}
+
+function handleImgFile(input){
+  const file = input.files[0]; if(!file) return;
+  if(file.size>5*1024*1024){ toast('error','Image must be under 5MB.'); return; }
+  _imgUploadFile = file;
+  // Show local preview immediately
+  const reader = new FileReader();
+  reader.onload = e=>{
+    document.getElementById('img-preview-el').src = e.target.result;
+    document.getElementById('img-preview-area').style.display='block';
+    document.getElementById('img-src-label').textContent='📁 Ready to upload: '+file.name;
+    document.getElementById('af-img-url').value='';
+    // af-img-final stays empty until actual upload on save
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleImgDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')){
+    const dt=new DataTransfer(); dt.items.add(file);
+    document.getElementById('af-img-file').files=dt.files;
+    handleImgFile(document.getElementById('af-img-file'));
+  }
+}
+
+function previewUrl(url){
+  document.getElementById('af-img-final').value=url;
+  document.getElementById('img-preview-el').src=url;
+  document.getElementById('img-preview-area').style.display= url?'block':'none';
+  document.getElementById('img-src-label').textContent='🔗 URL source';
+  _imgUploadFile=null;
+}
+
+function clearImg(){
+  _imgUploadFile=null;
+  document.getElementById('af-img-final').value='';
+  document.getElementById('af-img-url').value='';
+  document.getElementById('af-img-file').value='';
+  document.getElementById('img-preview-area').style.display='none';
+}
+
+async function uploadImageToStorage(file, productId){
+  const ref  = storage.ref(`products/${productId}_${Date.now()}_${file.name}`);
+  const prog = document.getElementById('upload-progress');
+  const bar  = document.getElementById('upload-bar');
+  prog.style.display='block';
+  return new Promise((resolve,reject)=>{
+    const task = ref.put(file);
+    task.on('state_changed',
+      snap=>{ bar.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%'; },
+      err=>{ prog.style.display='none'; reject(err); },
+      async ()=>{ prog.style.display='none'; bar.style.width='0%'; resolve(await task.snapshot.ref.getDownloadURL()); }
+    );
+  });
+}
+
+async function saveProduct(editId){
+  const name  = document.getElementById('af-name')?.value.trim();
+  const price = parseFloat(document.getElementById('af-price')?.value);
+  if(!name||!price){ toast('error','⚠️ Name and price are required.'); return; }
+
+  const btn = document.querySelector('#add-form-container .btn-primary');
+  if(btn){ btn.textContent='Saving…'; btn.disabled=true; }
+
+  try {
+    let imgUrl = document.getElementById('af-img-final')?.value||'';
+
+    // If user picked a file, upload to Firebase Storage first
+    if(_imgUploadFile){
+      const tempId = editId||'new_'+Date.now();
+      try { imgUrl = await uploadImageToStorage(_imgUploadFile, tempId); }
+      catch(e){ toast('error','Image upload failed: '+e.message); return; }
+    }
+
+    const old = parseFloat(document.getElementById('af-old')?.value)||null;
+    const data = {
+      name,
+      cat:        document.getElementById('af-cat')?.value,
+      price,
+      oldPrice:   old||null,
+      img:        imgUrl,
+      badge:      document.getElementById('af-badge')?.value||'',
+      desc:       document.getElementById('af-desc')?.value||'',
+      condition:  document.getElementById('af-cond')?.value||'New',
+      set:        document.getElementById('af-set')?.value||'—',
+      rarity:     document.getElementById('af-rarity')?.value||'—',
+      stock:      document.getElementById('af-stock')?.value||'In Stock',
+      stockCount: parseInt(document.getElementById('af-stock-count')?.value)||10,
+      featured:   document.getElementById('af-featured')?.checked||false,
+    };
+
+    if(editId){
+      await db.collection('products').doc(editId).update(data);
+      toast('success','✅ Product updated!');
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('products').add(data);
+      toast('success','✅ Product added!');
+    }
+
+    _imgUploadFile=null;
+    document.getElementById('add-form-container').innerHTML='';
+    renderAdmin();
+  } catch(e){
+    toast('error','Error saving product: '+e.message);
+    console.error(e);
+  } finally {
+    if(btn){ btn.textContent= editId?'Update Product':'Save Product'; btn.disabled=false; }
+  }
+}
+
+function editProduct(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  showAddForm(p);
+  document.getElementById('add-form-container').scrollIntoView({behavior:'smooth'});
+}
+
+async function deleteProduct(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  if(!window.confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+  try {
+    await db.collection('products').doc(id).delete();
+    // Optionally delete image from Storage too (if it's a Firebase Storage URL)
+    if(p.img && p.img.includes('firebasestorage')){
+      try { await storage.refFromURL(p.img).delete(); } catch(_){}
+    }
+    toast('success','🗑 Product deleted.');
+    renderAdmin();
+  } catch(e){ toast('error','Delete failed: '+e.message); }
+}
+
+// ════════════════════════════════════════════
+// 15. CHAT & NEWSLETTER
+// ════════════════════════════════════════════
+function toggleChat(){ document.getElementById('chat-popup').classList.toggle('open'); }
+function openChat(){   document.getElementById('chat-popup').classList.add('open'); }
+
+function subscribeNewsletter(){
+  const v = document.getElementById('nl-email').value.trim();
+  if(!v||!v.includes('@')){ toast('error','Please enter a valid email.'); return; }
+  // Optionally save to Firestore: db.collection('newsletter').add({email:v, createdAt:...})
+  document.getElementById('nl-email').value='';
+  toast('success',"✅ You're in! Welcome to the Vault.");
+}
+
+// ════════════════════════════════════════════
+// 16. INIT
+// ════════════════════════════════════════════
+(async function init(){
+  if(typeof emailjs!=='undefined' && EMAILJS_PUBLIC_KEY!=='YOUR_PUBLIC_KEY')
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  await loadProducts();
+  renderFeatured();
+  updateCartBadge();
+})();
+</script>
+</body>
+</html>
