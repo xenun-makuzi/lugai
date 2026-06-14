@@ -157,9 +157,11 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
 .detail-img-main{width:100%;aspect-ratio:1;background:var(--bg3);border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);overflow:hidden}
 .detail-img-main img{width:100%;height:100%;object-fit:contain;padding:8px}
 .detail-thumbs{display:flex;gap:8px;margin-top:12px}
-.detail-thumb{width:64px;height:64px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s}
+.detail-thumb{width:64px;height:64px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .2s;position:relative}
 .detail-thumb:hover,.detail-thumb.active{border-color:var(--gold)}
-.detail-thumb img{width:100%;height:100%;object-fit:contain}
+.detail-thumb img,.detail-thumb video{width:100%;height:100%;object-fit:contain}
+.detail-thumb .video-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3);font-size:18px;pointer-events:none}
+.detail-img-main video{width:100%;height:100%;object-fit:contain;padding:12px}
 .detail-brand{font-size:12px;color:var(--gold);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:10px}
 .detail-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,42px);letter-spacing:1px;line-height:1.05;margin-bottom:16px}
 .detail-price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
@@ -279,13 +281,17 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
 .admin-logout-btn:hover{background:rgba(255,71,87,.1)}
 
 /* IMAGE UPLOAD */
-.img-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.img-upload-zone{display:block;border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
 .img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--gold);background:rgba(201,168,76,.04)}
 .img-upload-zone input{display:none}
 .img-upload-zone p{font-size:13px;color:var(--text2);margin-top:8px}
 .img-preview-wrap{position:relative;display:inline-block;margin-top:10px}
-.img-preview-wrap img{width:120px;height:120px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border2)}
-.img-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.img-preview-wrap img,.img-preview-wrap video{width:120px;height:120px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border2)}
+.img-remove{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.gallery-preview-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.gallery-item{position:relative}
+.gallery-item img{width:80px;height:80px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border2)}
+.gallery-item .badge-tag{position:absolute;bottom:4px;left:4px;background:rgba(10,10,15,.8);color:var(--gold);font-size:10px;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace}
 .upload-progress{width:100%;height:4px;background:var(--bg4);border-radius:2px;margin-top:8px;overflow:hidden;display:none}
 .upload-progress-bar{height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width .3s}
 
@@ -856,7 +862,8 @@ function openWA(msg){
 }
 
 function imgTag(p, cls=''){
-  if(p.img) return `<img src="${p.img}" alt="${p.name}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">`;
+  const src = (p.images && p.images[0]) || p.img;
+  if(src) return `<img src="${src}" alt="${p.name}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">`;
   return `<span class="img-ph">🃏</span>`;
 }
 
@@ -898,10 +905,11 @@ const badgeMap = {rare:'badge-rare',new:'badge-new',sale:'badge-sale',limited:'b
 
 function productCard(p, origin){
   const w = wishlist.includes(p.id);
+  const thumb = (p.images && p.images[0]) || p.img || '';
   return `<div class="product-card" onclick="openProduct('${p.id}','${origin}')">
     <div class="product-img">
-      ${p.img
-        ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s" onerror="this.outerHTML='<span class=img-ph>🃏</span>'">`
+      ${thumb
+        ? `<img src="${thumb}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s" onerror="this.outerHTML='<span class=img-ph>🃏</span>'">`
         : `<span class="img-ph">🃏</span>`}
       ${p.badge?`<span class="product-badge ${badgeMap[p.badge]||''}">${p.badge.toUpperCase()}</span>`:''}
       <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish('${p.id}')" style="color:${w?'#FF4757':'var(--text2)'}" title="Wishlist">♥</button>
@@ -1001,13 +1009,27 @@ function openProduct(id, origin){
   if(!p) return;
   currentProduct=p; currentQty=1; fromPage=origin||'shop';
 
+  // Build gallery list: images first, then video (if any)
+  const images = (p.images && p.images.length) ? p.images : (p.img ? [p.img] : []);
+  const gallery = images.map(src=>({type:'image', src}));
+  if(p.video) gallery.push({type:'video', src:p.video});
+
   document.getElementById('product-back-btn').onclick = ()=>navigate(fromPage);
-  document.getElementById('detail-img').innerHTML = p.img
-    ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:12px" onerror="this.outerHTML='<span style=font-size:80px>🃏</span>'">`
-    : `<span style="font-size:80px">🃏</span>`;
-  document.getElementById('detail-thumbs').innerHTML = [p.img,p.img,p.img].filter(Boolean).map((src,i)=>
-    `<div class="detail-thumb ${i===0?'active':''}" onclick="selectThumb(this,'${src}')"><img src="${src}" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML='🃏'"></div>`
+
+  if(gallery.length){
+    document.getElementById('detail-img').innerHTML = renderMainMedia(gallery[0]);
+  } else {
+    document.getElementById('detail-img').innerHTML = `<span style="font-size:80px">🃏</span>`;
+  }
+
+  document.getElementById('detail-thumbs').innerHTML = gallery.map((m,i)=>`
+    <div class="detail-thumb ${i===0?'active':''}" onclick='selectThumb(this,${JSON.stringify(m).replace(/'/g,"&apos;")})'>
+      ${m.type==='video'
+        ? `<video src="${m.src}" muted></video><span class="video-icon">▶</span>`
+        : `<img src="${m.src}" onerror="this.outerHTML='🃏'">`}
+    </div>`
   ).join('');
+
   document.getElementById('detail-brand').textContent  = (p.cat||'').toUpperCase()+' — LUGAITCG';
   document.getElementById('detail-title').textContent  = p.name;
   document.getElementById('detail-price').textContent  = fmt(p.price);
@@ -1035,11 +1057,17 @@ function openProduct(id, origin){
   navigate('product');
 }
 
-function selectThumb(el, src){
+function renderMainMedia(m){
+  if(m.type==='video'){
+    return `<video src="${m.src}" style="width:100%;height:100%;object-fit:contain;padding:12px" controls autoplay muted loop></video>`;
+  }
+  return `<img src="${m.src}" alt="Product" style="width:100%;height:100%;object-fit:contain;padding:12px" onerror="this.outerHTML='<span style=font-size:80px>🃏</span>'">`;
+}
+
+function selectThumb(el, media){
   document.querySelectorAll('.detail-thumb').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('detail-img').innerHTML =
-    `<img src="${src}" style="width:100%;height:100%;object-fit:contain;padding:12px">`;
+  document.getElementById('detail-img').innerHTML = renderMainMedia(media);
 }
 
 function changeQty(d){
@@ -1060,7 +1088,7 @@ function addToCart(id, silent){
   const p = products.find(x=>x.id===id);
   if(!p) return;
   const ex = cart.find(c=>c.id===id);
-  if(ex) ex.qty++; else cart.push({id,name:p.name,price:p.price,img:p.img||'',cat:p.cat,qty:1});
+  if(ex) ex.qty++; else cart.push({id,name:p.name,price:p.price,img:(p.images&&p.images[0])||p.img||'',cat:p.cat,qty:1});
   updateCartBadge();
   if(!silent) toast('success',`✅ ${p.name.split(' ').slice(0,3).join(' ')}… added!`);
 }
@@ -1299,15 +1327,18 @@ async function renderAdmin(){
     </div>
   `;
 
-  document.getElementById('admin-tbody').innerHTML = products.map((p,i)=>`
+  document.getElementById('admin-tbody').innerHTML = products.map((p,i)=>{
+    const thumb = (p.images && p.images[0]) || p.img || '';
+    return `
     <tr>
       <td style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:12px">${i+1}</td>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:44px;height:44px;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center">
-            ${p.img?`<img src="${p.img}" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='🃏'">`:'<span>🃏</span>'}
+          <div style="width:44px;height:44px;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;position:relative">
+            ${thumb?`<img src="${thumb}" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='🃏'">`:'<span>🃏</span>'}
+            ${p.video?'<span style="position:absolute;bottom:1px;right:1px;font-size:9px;background:rgba(0,0,0,.6);border-radius:3px;padding:0 2px">🎬</span>':''}
           </div>
-          <div><div style="font-weight:500;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--text3)">${p.set||'—'}</div></div>
+          <div><div style="font-weight:500;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--text3)">${p.set||'—'}${p.images&&p.images.length>1?` · ${p.images.length} photos`:''}</div></div>
         </div>
       </td>
       <td><span style="font-size:12px;padding:3px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--border)">${p.cat}</span></td>
@@ -1318,13 +1349,12 @@ async function renderAdmin(){
         <button class="action-btn del" onclick="deleteProduct('${p.id}')">🗑 Delete</button>
       </td>
     </tr>
-  `).join('');
+  `;}).join('');
 }
 
 // ════════════════════════════════════════════
 // 14. ADD / EDIT PRODUCT FORM
 // ════════════════════════════════════════════
-let _imgUploadFile = null;
 
 function showAddForm(prefill){
   const p = prefill||{};
@@ -1357,33 +1387,53 @@ function showAddForm(prefill){
         <textarea class="form-input" id="af-desc" placeholder="Describe the product…" rows="3" style="resize:vertical">${p.desc||''}</textarea>
       </div>
 
-      <!-- IMAGE UPLOAD -->
+      <!-- IMAGES (multiple) -->
       <div class="form-group" style="margin-top:12px">
-        <label class="form-label">Product Image</label>
+        <label class="form-label">Product Images (any number — first one is the main thumbnail)</label>
         <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div class="img-upload-zone" id="upload-zone" onclick="document.getElementById('af-img-file').click()"
+          <label class="img-upload-zone" id="upload-zone" for="af-img-files"
                ondragover="event.preventDefault();this.classList.add('drag')"
                ondragleave="this.classList.remove('drag')"
                ondrop="handleImgDrop(event)">
-            <input type="file" id="af-img-file" accept="image/*" onchange="handleImgFile(this)">
+            <input type="file" id="af-img-files" accept="image/*" multiple onchange="handleImgFiles(this.files)">
             <div style="font-size:32px">📁</div>
-            <p>Click or drag & drop<br><span style="font-size:11px;color:var(--text3)">JPG, PNG, WebP — max 5MB</span></p>
-          </div>
+            <p>Click or drag & drop<br><span style="font-size:11px;color:var(--text3)">JPG, PNG, WebP — max 5MB each, multiple allowed</span></p>
+          </label>
           <div style="flex:1;min-width:180px">
-            <label class="form-label" style="margin-bottom:6px">Or paste image URL</label>
-            <input class="form-input" id="af-img-url" placeholder="https://…" oninput="previewUrl(this.value)" value="${p.img&&!p.img.startsWith('data:')?p.img:''}">
+            <label class="form-label" style="margin-bottom:6px">Or add image URL</label>
+            <div style="display:flex;gap:8px">
+              <input class="form-input" id="af-img-url" placeholder="https://…">
+              <button class="btn btn-ghost" type="button" onclick="addImageUrl()" style="white-space:nowrap">+ Add</button>
+            </div>
           </div>
         </div>
         <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-bar"></div></div>
-        <div id="img-preview-area" style="${p.img?'':'display:none'};margin-top:12px">
-          <div class="img-preview-wrap">
-            <img id="img-preview-el" src="${p.img||''}" alt="Preview">
-            <button class="img-remove" onclick="clearImg()">✕</button>
+        <div class="gallery-preview-grid" id="gallery-preview"></div>
+      </div>
+
+      <!-- VIDEO (single) -->
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Product Video (optional — one video)</label>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+          <label class="img-upload-zone" id="video-upload-zone" for="af-video-file">
+            <input type="file" id="af-video-file" accept="video/*" onchange="handleVideoFile(this.files[0])">
+            <div style="font-size:32px">🎬</div>
+            <p>Click to upload video<br><span style="font-size:11px;color:var(--text3)">MP4, WebM — max 25MB</span></p>
+          </label>
+          <div style="flex:1;min-width:180px">
+            <label class="form-label" style="margin-bottom:6px">Or paste video URL</label>
+            <input class="form-input" id="af-video-url" placeholder="https://…/video.mp4" oninput="setVideoUrl(this.value)" value="${p.video&&!p.video.startsWith('data:')?p.video:''}">
           </div>
-          <p style="font-size:12px;color:var(--text3);margin-top:6px" id="img-src-label">${p.img?'Current image':''}  </p>
+        </div>
+        <div class="upload-progress" id="video-upload-progress"><div class="upload-progress-bar" id="video-upload-bar"></div></div>
+        <div id="video-preview-area" style="${p.video?'':'display:none'};margin-top:12px">
+          <div class="img-preview-wrap">
+            <video id="video-preview-el" src="${p.video||''}" muted controls></video>
+            <button class="img-remove" onclick="clearVideo()">✕</button>
+          </div>
         </div>
       </div>
-      <input type="hidden" id="af-img-final" value="${p.img||''}">
+      <input type="hidden" id="af-video-final" value="${p.video||''}">
 
       <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="saveProduct('${p.id||''}')">${p.id?'Update Product':'Save Product'}</button>
@@ -1391,63 +1441,112 @@ function showAddForm(prefill){
       </div>
     </div>
   `;
-  _imgUploadFile = null;
+  // Initialise gallery state from existing product
+  _galleryItems = [];
+  const existingImages = (p.images && p.images.length) ? p.images : (p.img ? [p.img] : []);
+  existingImages.forEach(src=>_galleryItems.push({src, file:null}));
+  renderGalleryPreview();
 }
 
-function handleImgFile(input){
-  const file = input.files[0]; if(!file) return;
-  if(file.size>5*1024*1024){ toast('error','Image must be under 5MB.'); return; }
-  _imgUploadFile = file;
-  // Show local preview immediately
-  const reader = new FileReader();
-  reader.onload = e=>{
-    document.getElementById('img-preview-el').src = e.target.result;
-    document.getElementById('img-preview-area').style.display='block';
-    document.getElementById('img-src-label').textContent='📁 Ready to upload: '+file.name;
-    document.getElementById('af-img-url').value='';
-    // af-img-final stays empty until actual upload on save
-  };
-  reader.readAsDataURL(file);
+// ── GALLERY STATE ──
+// Each item: { src: <preview url or remote url>, file: <File|null> }
+let _galleryItems = [];
+let _videoFile = null;
+
+function renderGalleryPreview(){
+  const el = document.getElementById('gallery-preview');
+  if(!el) return;
+  el.innerHTML = _galleryItems.map((item,i)=>`
+    <div class="gallery-item">
+      <img src="${item.src}" alt="img ${i+1}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3C/svg%3E'">
+      ${i===0?'<span class="badge-tag">MAIN</span>':''}
+      <button class="img-remove" onclick="removeGalleryItem(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function handleImgFiles(fileList){
+  const files = Array.from(fileList).filter(file=>{
+    if(file.size>5*1024*1024){ toast('error',`${file.name} is over 5MB — skipped.`); return false; }
+    return true;
+  });
+  if(!files.length){
+    document.getElementById('af-img-files').value='';
+    return;
+  }
+  Promise.all(files.map(file=>new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload  = e=>resolve({src:e.target.result, file});
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  }))).then(items=>{
+    _galleryItems = _galleryItems.concat(items);
+    renderGalleryPreview();
+  }).catch(()=>{
+    toast('error','Could not read one or more files.');
+  }).finally(()=>{
+    document.getElementById('af-img-files').value='';
+  });
 }
 
 function handleImgDrop(e){
   e.preventDefault();
   document.getElementById('upload-zone').classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if(file&&file.type.startsWith('image/')){
-    const dt=new DataTransfer(); dt.items.add(file);
-    document.getElementById('af-img-file').files=dt.files;
-    handleImgFile(document.getElementById('af-img-file'));
-  }
+  const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(files.length) handleImgFiles(files);
 }
 
-function previewUrl(url){
-  document.getElementById('af-img-final').value=url;
-  document.getElementById('img-preview-el').src=url;
-  document.getElementById('img-preview-area').style.display= url?'block':'none';
-  document.getElementById('img-src-label').textContent='🔗 URL source';
-  _imgUploadFile=null;
-}
-
-function clearImg(){
-  _imgUploadFile=null;
-  document.getElementById('af-img-final').value='';
+function addImageUrl(){
+  const url = document.getElementById('af-img-url').value.trim();
+  if(!url) return;
+  _galleryItems.push({src:url, file:null});
   document.getElementById('af-img-url').value='';
-  document.getElementById('af-img-file').value='';
-  document.getElementById('img-preview-area').style.display='none';
+  renderGalleryPreview();
 }
 
-async function uploadImageToStorage(file, productId){
-  const ref  = storage.ref(`products/${productId}_${Date.now()}_${file.name}`);
-  const prog = document.getElementById('upload-progress');
-  const bar  = document.getElementById('upload-bar');
-  prog.style.display='block';
+function removeGalleryItem(i){
+  _galleryItems.splice(i,1);
+  renderGalleryPreview();
+}
+
+// ── VIDEO STATE ──
+function handleVideoFile(file){
+  if(!file) return;
+  if(file.size>25*1024*1024){ toast('error','Video must be under 25MB.'); return; }
+  _videoFile = file;
+  const url = URL.createObjectURL(file);
+  document.getElementById('video-preview-el').src = url;
+  document.getElementById('video-preview-area').style.display='block';
+  document.getElementById('af-video-url').value='';
+  document.getElementById('af-video-final').value=''; // cleared until uploaded on save
+}
+
+function setVideoUrl(url){
+  document.getElementById('af-video-final').value = url;
+  document.getElementById('video-preview-el').src = url;
+  document.getElementById('video-preview-area').style.display = url?'block':'none';
+  _videoFile = null;
+}
+
+function clearVideo(){
+  _videoFile = null;
+  document.getElementById('af-video-final').value='';
+  document.getElementById('af-video-url').value='';
+  document.getElementById('af-video-file').value='';
+  document.getElementById('video-preview-area').style.display='none';
+}
+
+async function uploadFileToStorage(file, path, progressBarId, progressWrapId){
+  const ref  = storage.ref(path);
+  const prog = document.getElementById(progressWrapId);
+  const bar  = document.getElementById(progressBarId);
+  if(prog) prog.style.display='block';
   return new Promise((resolve,reject)=>{
     const task = ref.put(file);
     task.on('state_changed',
-      snap=>{ bar.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%'; },
-      err=>{ prog.style.display='none'; reject(err); },
-      async ()=>{ prog.style.display='none'; bar.style.width='0%'; resolve(await task.snapshot.ref.getDownloadURL()); }
+      snap=>{ if(bar) bar.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%'; },
+      err=>{ if(prog) prog.style.display='none'; reject(err); },
+      async ()=>{ if(prog) prog.style.display='none'; if(bar) bar.style.width='0%'; resolve(await task.snapshot.ref.getDownloadURL()); }
     );
   });
 }
@@ -1461,13 +1560,24 @@ async function saveProduct(editId){
   if(btn){ btn.textContent='Saving…'; btn.disabled=true; }
 
   try {
-    let imgUrl = document.getElementById('af-img-final')?.value||'';
+    const productId = editId || 'new_'+Date.now();
 
-    // If user picked a file, upload to Firebase Storage first
-    if(_imgUploadFile){
-      const tempId = editId||'new_'+Date.now();
-      try { imgUrl = await uploadImageToStorage(_imgUploadFile, tempId); }
-      catch(e){ toast('error','Image upload failed: '+e.message); return; }
+    // Upload any new image files, keep existing URLs as-is
+    const imageUrls = [];
+    for(let i=0;i<_galleryItems.length;i++){
+      const item = _galleryItems[i];
+      if(item.file){
+        const url = await uploadFileToStorage(item.file, `products/${productId}_img${i}_${Date.now()}_${item.file.name}`, 'upload-bar', 'upload-progress');
+        imageUrls.push(url);
+      } else {
+        imageUrls.push(item.src);
+      }
+    }
+
+    // Upload video if a new file was chosen
+    let videoUrl = document.getElementById('af-video-final')?.value||'';
+    if(_videoFile){
+      videoUrl = await uploadFileToStorage(_videoFile, `products/${productId}_video_${Date.now()}_${_videoFile.name}`, 'video-upload-bar', 'video-upload-progress');
     }
 
     const old = parseFloat(document.getElementById('af-old')?.value)||null;
@@ -1476,7 +1586,9 @@ async function saveProduct(editId){
       cat:        document.getElementById('af-cat')?.value,
       price,
       oldPrice:   old||null,
-      img:        imgUrl,
+      images:     imageUrls,
+      img:        imageUrls[0]||'', // backward-compatible main thumbnail
+      video:      videoUrl||'',
       badge:      document.getElementById('af-badge')?.value||'',
       desc:       document.getElementById('af-desc')?.value||'',
       condition:  document.getElementById('af-cond')?.value||'New',
@@ -1496,7 +1608,7 @@ async function saveProduct(editId){
       toast('success','✅ Product added!');
     }
 
-    _imgUploadFile=null;
+    _galleryItems=[]; _videoFile=null;
     document.getElementById('add-form-container').innerHTML='';
     renderAdmin();
   } catch(e){
@@ -1520,9 +1632,12 @@ async function deleteProduct(id){
   if(!window.confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
   try {
     await db.collection('products').doc(id).delete();
-    // Optionally delete image from Storage too (if it's a Firebase Storage URL)
-    if(p.img && p.img.includes('firebasestorage')){
-      try { await storage.refFromURL(p.img).delete(); } catch(_){}
+    // Clean up Storage files belonging to this product
+    const allMedia = [...(p.images||[]), p.img, p.video].filter(Boolean);
+    for(const url of allMedia){
+      if(url.includes('firebasestorage')){
+        try { await storage.refFromURL(url).delete(); } catch(_){}
+      }
     }
     toast('success','🗑 Product deleted.');
     renderAdmin();
