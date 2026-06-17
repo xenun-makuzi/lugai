@@ -435,7 +435,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
       <div class="cat-card" onclick="filterShop('Singles')"><span class="cat-icon">🃏</span><div class="cat-name">Singles</div><div class="cat-count">1,200+ items</div></div>
       <div class="cat-card" onclick="navigate('graded')"><span class="cat-icon">🏅</span><div class="cat-name">Graded Cards</div><div class="cat-count">65+ items</div></div>
       <div class="cat-card" onclick="filterShop('Accessories')"><span class="cat-icon">🛡️</span><div class="cat-name">Accessories</div><div class="cat-count">200+ items</div></div>
-      <div class="cat-card" onclick="filterShop('Holographic Cardss')"><span class="cat-icon">✨</span><div class="cat-name">Holographic Cardss</div><div class="cat-count">80+ items</div></div>
+      <div class="cat-card" onclick="filterShop('Holographic Cards')"><span class="cat-icon">✨</span><div class="cat-name">Holographic Cards</div><div class="cat-count">80+ items</div></div>
       <div class="cat-card" onclick="filterShop('Deck Boxes')"><span class="cat-icon">📚</span><div class="cat-name">Deck Boxes</div><div class="cat-count">55+ items</div></div>
       <div class="cat-card" onclick="filterShop('Rare')"><span class="cat-icon">💎</span><div class="cat-name">Rare Collectibles</div><div class="cat-count">30+ items</div></div>
       <div class="cat-card" onclick="filterShop('new')"><span class="cat-icon">🆕</span><div class="cat-name">New Arrivals</div><div class="cat-count">45 this week</div></div>
@@ -544,7 +544,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
       <select class="filter-select" id="cat-filter" onchange="renderShop()">
         <option value="">All Categories</option>
         <option>Pokémon</option><option>Sports</option><option>Booster</option><option>Sealed</option>
-        <option>Singles</option><option>Graded</option><option>Accessories</option><option>Holographic Cardss</option><option>Deck Boxes</option><option>Rare</option>
+        <option>Singles</option><option>Graded</option><option>Accessories</option><option>Holographic Cards</option><option>Deck Boxes</option><option>Rare</option>
       </select>
       <select class="filter-select" id="price-filter" onchange="renderShop()">
         <option value="">All Prices</option>
@@ -988,7 +988,7 @@ function filterShop(val){
   navigate('shop');
   setTimeout(()=>{
     const cf = document.getElementById('cat-filter');
-    const cats = ['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Holographic Cardss','Deck Boxes','Rare'];
+    const cats = ['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Holographic Cards','Deck Boxes','Rare'];
     if(cats.find(c=>c.toLowerCase()===val.toLowerCase())){
       if(cf){ cf.value=cats.find(c=>c.toLowerCase()===val.toLowerCase())||''; }
     }
@@ -1365,7 +1365,7 @@ function showAddForm(prefill){
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
         <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="af-name" placeholder="e.g. Charizard VMAX" value="${p.name||''}"></div>
         <div class="form-group"><label class="form-label">Category *</label>
-          <select class="form-input" id="af-cat">${['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Holographic Cardss','Deck Boxes','Rare'].map(c=>`<option${p.cat===c?' selected':''}>${c}</option>`).join('')}</select>
+          <select class="form-input" id="af-cat">${['Pokémon','Sports','Booster','Sealed','Singles','Graded','Accessories','Holographic Cards','Deck Boxes','Rare'].map(c=>`<option${p.cat===c?' selected':''}>${c}</option>`).join('')}</select>
         </div>
         <div class="form-group"><label class="form-label">Price (USD) *</label><input class="form-input" id="af-price" type="number" step="0.01" placeholder="9.99" value="${p.price||''}"></div>
         <div class="form-group"><label class="form-label">Old / Original Price</label><input class="form-input" id="af-old" type="number" step="0.01" placeholder="19.99" value="${p.oldPrice||''}"></div>
