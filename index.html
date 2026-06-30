@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LugaiTCG — Premium Trading Cards & Collectibles</title>
+<title>LugaiTCG — Premium Trading Cards &amp; Collectibles</title>
 <meta name="description" content="America's premier destination for authentic Pokémon cards, sports cards, graded collectibles, booster boxes and accessories.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -228,10 +228,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
 .payment-page{padding:48px 24px;max-width:800px;margin:0 auto}
 .payment-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;margin-bottom:8px}
 .payment-sub{color:var(--text2);font-size:15px;margin-bottom:36px}
-.payment-tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border)}
-.payment-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:10px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:all .2s;margin-bottom:-1px}
-.payment-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.payment-panel{display:none}.payment-panel.active{display:block}
+.payment-methods-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.payment-method-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s}
+.payment-method-card:hover{border-color:var(--gold);transform:translateY(-3px);background:var(--bg3)}
+.payment-method-icon{font-size:38px;margin-bottom:14px}
+.payment-method-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.payment-method-desc{font-size:12px;color:var(--text3);line-height:1.4}
 .payment-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:32px}
 .crypto-address{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;color:var(--accent);margin:16px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .copy-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .2s}
@@ -239,6 +241,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
 .qr-box{width:160px;height:160px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:64px;margin:16px auto}
 .pay-instructions{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:var(--radius-lg);padding:16px;font-size:13px;color:var(--text2);line-height:1.8;margin-top:16px}
 .pay-instructions strong{color:var(--gold)}
+.support-redirect-box{text-align:center;padding:8px 0}
+.support-channel-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+.support-channel-btn{flex:1;min-width:160px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all .2s;text-align:center}
+.support-channel-btn:hover{border-color:var(--gold);background:var(--bg4)}
+.support-channel-btn .icon{font-size:30px;margin-bottom:8px}
+.support-channel-btn .label{font-size:14px;font-weight:600}
+.support-channel-btn .sub{font-size:11px;color:var(--text3);margin-top:2px}
 
 /* ADMIN */
 .admin-page{padding:32px 24px;max-width:1100px;margin:0 auto}
@@ -281,9 +290,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
 .admin-logout-btn:hover{background:rgba(255,71,87,.1)}
 
 /* IMAGE UPLOAD */
-.img-upload-zone{display:block;border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.img-upload-zone{display:block;position:relative;border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
 .img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--gold);background:rgba(201,168,76,.04)}
-.img-upload-zone input{display:none}
+.img-upload-zone input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .img-upload-zone p{font-size:13px;color:var(--text2);margin-top:8px}
 .img-preview-wrap{position:relative;display:inline-block;margin-top:10px}
 .img-preview-wrap img,.img-preview-wrap video{width:120px;height:120px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border2)}
@@ -517,8 +526,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
         <a>Track Order</a><a>FAQ</a>
       </div>
       <div class="footer-col"><h4>POLICIES</h4>
-        <a>Shipping Policy</a><a>Return Policy (30 days)</a>
-        <a>Privacy Policy</a><a>Terms &amp; Conditions</a>
+        <a href="shipping-policy.html">Shipping Policy</a>
+        <a href="refund-policy.html">Refund &amp; Return Policy</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-of-service.html">Terms &amp; Conditions</a>
       </div>
       <div class="footer-col"><h4>CONTACT</h4>
         <a href="mailto:support@lugaitcg.com">📧 support@lugaitcg.com</a>
@@ -704,42 +715,71 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 24p
   <div class="payment-page">
     <div class="payment-title">COMPLETE PAYMENT</div>
     <div class="payment-sub">Order received! Reference: <span id="order-ref" style="font-family:'JetBrains Mono',monospace;color:var(--gold)"></span></div>
-    <div class="payment-tabs">
-      <button class="payment-tab active" onclick="switchPayTab('btc',this)">₿ Bitcoin</button>
-      <button class="payment-tab" onclick="switchPayTab('other',this)">💬 Other Method</button>
-    </div>
 
-    <div class="payment-panel active" id="pay-btc">
-      <div class="payment-card">
-        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin-bottom:6px">₿ BITCOIN PAYMENT</h3>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Send the exact order total in BTC to the address below. BTC network only.</p>
-        <div class="qr-box">📱</div>
-        <p style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:6px;font-family:'JetBrains Mono',monospace">BTC WALLET ADDRESS</p>
-        <div class="crypto-address">
-          <!-- ⚠️ Replace with your real BTC wallet address -->
-          <span id="btc-addr">1H7QyCp7Htpf329CEb2pzj6a4JYGHtm6bD</span>
-          <button class="copy-btn" onclick="copyEl('btc-addr','BTC address')">Copy</button>
+    <!-- STEP 1: choose a payment method -->
+    <div id="payment-method-select">
+      <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Select how you'd like to pay. One of our team members will confirm and complete your payment with you directly.</p>
+      <div class="payment-methods-grid">
+        <div class="payment-method-card" onclick="choosePaymentMethod('crypto')">
+          <div class="payment-method-icon">₿</div>
+          <div class="payment-method-name">Cryptocurrency</div>
+          <div class="payment-method-desc">Bitcoin &amp; other crypto</div>
         </div>
-        <div class="pay-instructions">
-          <strong>How to pay:</strong><br>
-          Note: Shipping costs $25<br>
-          1. Open your Bitcoin wallet (Coinbase, Trust Wallet, etc.)<br>
-          2. Send the <strong>exact order total</strong> in BTC to the address above<br>
-          3. Screenshot your transaction hash / confirmation<br>
-          4. Email proof to <strong>support@lugaitcg.com</strong> with your order reference<br>
-          5. Order confirmed within 1–2 hours of payment verification
+        <div class="payment-method-card" onclick="choosePaymentMethod('card')">
+          <div class="payment-method-icon">💳</div>
+          <div class="payment-method-name">Credit / Debit Card</div>
+          <div class="payment-method-desc">Visa, Mastercard, Amex</div>
         </div>
-        <button class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center" onclick="openWA('Hello! I just sent a Bitcoin payment for my LugaiTCG order. My reference is: ')">📱 Send Payment Proof via WhatsApp</button>
+        <div class="payment-method-card" onclick="choosePaymentMethod('paypal')">
+          <div class="payment-method-icon">🅿️</div>
+          <div class="payment-method-name">PayPal</div>
+          <div class="payment-method-desc">Pay with your PayPal balance</div>
+        </div>
+        <div class="payment-method-card" onclick="choosePaymentMethod('googlepay')">
+          <div class="payment-method-icon">🇬</div>
+          <div class="payment-method-name">Google Pay</div>
+          <div class="payment-method-desc">Fast checkout with Google</div>
+        </div>
+        <div class="payment-method-card" onclick="choosePaymentMethod('applepay')">
+          <div class="payment-method-icon">🍎</div>
+          <div class="payment-method-name">Apple Pay</div>
+          <div class="payment-method-desc">Fast checkout with Apple</div>
+        </div>
+        <div class="payment-method-card" onclick="choosePaymentMethod('other')">
+          <div class="payment-method-icon">💬</div>
+          <div class="payment-method-name">Other Method</div>
+          <div class="payment-method-desc">Talk to our team</div>
+        </div>
       </div>
     </div>
 
-    <div class="payment-panel" id="pay-other">
-      <div class="payment-card" style="text-align:center;padding:48px 32px">
-        <div style="font-size:64px;margin-bottom:20px">💬</div>
-        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:10px">NEED ANOTHER WAY?</h3>
-        <p style="color:var(--text2);font-size:15px;line-height:1.6;margin-bottom:28px">Contact our support team and we'll find a payment solution — PayPal, CashApp, Venmo and more.</p>
-        <button class="btn btn-primary" style="font-size:16px;padding:14px 36px;justify-content:center" onclick="openWA('Hello! I would like to discuss payment options for my LugaiTCG order.')">💬 Chat with Support Now</button>
-        <p style="color:var(--text3);font-size:13px;margin-top:16px">Available Mon–Sun: 9am–9pm ET</p>
+    <!-- STEP 2: redirected to support to complete chosen method -->
+    <div id="payment-support-redirect" style="display:none">
+      <button class="back-btn" onclick="backToPaymentMethods()">← Choose a different method</button>
+      <div class="payment-card support-redirect-box">
+        <div style="font-size:56px;margin-bottom:16px" id="chosen-method-icon">₿</div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:8px" id="chosen-method-title">Complete your payment</h3>
+        <p style="color:var(--text2);font-size:14px;line-height:1.6;max-width:480px;margin:0 auto" id="chosen-method-desc">
+          For your security, our support team will guide you through completing this payment safely.
+        </p>
+        <div class="pay-instructions" style="text-align:left;max-width:480px;margin:20px auto 0">
+          <strong>Order reference:</strong> <span id="redirect-order-ref" style="font-family:'JetBrains Mono',monospace;color:var(--gold)"></span><br>
+          <strong>Order total:</strong> <span id="redirect-order-total" style="font-family:'JetBrains Mono',monospace;color:var(--gold)"></span><br>
+          <strong>Payment method:</strong> <span id="redirect-method-name"></span>
+        </div>
+        <div class="support-channel-row">
+          <button class="support-channel-btn" onclick="goToWhatsAppSupport()">
+            <div class="icon">📱</div>
+            <div class="label">WhatsApp</div>
+            <div class="sub">Fastest — usually under 5 min</div>
+          </button>
+          <button class="support-channel-btn" onclick="goToLiveChatSupport()">
+            <div class="icon">💬</div>
+            <div class="label">Live Chat</div>
+            <div class="sub">Chat right here on the site</div>
+          </button>
+        </div>
+        <p style="color:var(--text3);font-size:12px;margin-top:20px">Available Mon–Sun: 9am–9pm ET</p>
       </div>
     </div>
   </div>
@@ -801,6 +841,17 @@ const DISCOUNT_CODES = {
   'RARE20':   { pct: 20,  label: '20% off — Rare collector deal' },
   'VAULT15':  { pct: 15,  label: '15% off — Vault member code'  },
 };
+
+// Payment method display config
+const PAYMENT_METHODS = {
+  crypto:    { icon:'₿',  name:'Cryptocurrency',     desc:'Our team will share a Bitcoin (or other crypto) wallet address and confirm your payment once received.' },
+  card:      { icon:'💳', name:'Credit / Debit Card', desc:'Our team will send you a secure card payment link to complete checkout safely.' },
+  paypal:    { icon:'🅿️', name:'PayPal',              desc:'Our team will send a PayPal invoice or payment request to your email.' },
+  googlepay: { icon:'🇬',  name:'Google Pay',          desc:'Our team will guide you through completing your payment with Google Pay.' },
+  applepay:  { icon:'🍎', name:'Apple Pay',           desc:'Our team will guide you through completing your payment with Apple Pay.' },
+  other:     { icon:'💬', name:'Other Method',        desc:"Tell our team how you'd like to pay and we'll work out the best option for you." },
+};
+let _chosenPaymentMethod = null;
 
 // ════════════════════════════════════════════
 // 1.  FIREBASE INIT
@@ -886,7 +937,7 @@ async function navigate(page){
   if(page==='sports')  renderCatPage('Sports');
   if(page==='graded')  renderCatPage('Graded');
   if(page==='cart')    renderCart();
-  if(page==='payment') generateOrderRef();
+  if(page==='payment') { generateOrderRef(); resetPaymentPage(); }
   if(page==='admin'){
     // Gate: require Firebase Auth
     if(!auth.currentUser){ showAdminLogin(); return; }
@@ -1239,18 +1290,66 @@ async function submitOrder(){
   }
 
   window._lastRef = ref;
+  window._lastOrderTotal = total;
   setTimeout(()=>{ btn.textContent='Proceed to Payment →'; btn.disabled=false; navigate('payment'); },1400);
 }
 
 // ════════════════════════════════════════════
-// 11. PAYMENT
+// 11. PAYMENT — method selection + support handoff
 // ════════════════════════════════════════════
-function switchPayTab(tab, el){
-  document.querySelectorAll('.payment-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.payment-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('pay-'+tab).classList.add('active');
-  if(tab==='other') openChat();
+function resetPaymentPage(){
+  _chosenPaymentMethod = null;
+  document.getElementById('payment-method-select').style.display = 'block';
+  document.getElementById('payment-support-redirect').style.display = 'none';
+}
+
+function choosePaymentMethod(methodKey){
+  const method = PAYMENT_METHODS[methodKey];
+  if(!method) return;
+  _chosenPaymentMethod = methodKey;
+
+  document.getElementById('chosen-method-icon').textContent  = method.icon;
+  document.getElementById('chosen-method-title').textContent = `Pay with ${method.name}`;
+  document.getElementById('chosen-method-desc').textContent  = method.desc;
+  document.getElementById('redirect-method-name').textContent = method.name;
+  document.getElementById('redirect-order-ref').textContent  = window._lastRef || 'LT-'+Date.now();
+  document.getElementById('redirect-order-total').textContent = window._lastOrderTotal!=null ? fmt(window._lastOrderTotal) : '';
+
+  document.getElementById('payment-method-select').style.display    = 'none';
+  document.getElementById('payment-support-redirect').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function backToPaymentMethods(){
+  document.getElementById('payment-method-select').style.display    = 'block';
+  document.getElementById('payment-support-redirect').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function goToWhatsAppSupport(){
+  const method = PAYMENT_METHODS[_chosenPaymentMethod] || {name:'a payment method'};
+  const ref    = window._lastRef || '';
+  const total  = window._lastOrderTotal!=null ? fmt(window._lastOrderTotal) : '';
+  const msg = `Hello! I'd like to complete payment for my LugaiTCG order.\nOrder reference: ${ref}\nOrder total: ${total}\nPreferred payment method: ${method.name}`;
+  openWA(msg);
+}
+
+function goToLiveChatSupport(){
+  const method = PAYMENT_METHODS[_chosenPaymentMethod] || {name:'a payment method'};
+  const ref    = window._lastRef || '';
+  const total  = window._lastOrderTotal!=null ? fmt(window._lastOrderTotal) : '';
+  // Pre-fill the live chat with context, then open it
+  const chatBody = document.querySelector('#chat-popup .chat-body');
+  if(chatBody){
+    const note = document.createElement('div');
+    note.className = 'chat-msg';
+    note.style.background = 'rgba(201,168,76,.08)';
+    note.style.borderLeft = '2px solid var(--gold)';
+    note.innerHTML = `I'd like to pay via <strong>${method.name}</strong> for order <strong>${ref}</strong> (Total: ${total}). Please assist me.`;
+    chatBody.appendChild(note);
+  }
+  openChat();
+  toast('success','💬 Live chat opened — our team will assist you shortly.');
 }
 
 function generateOrderRef(){
@@ -1466,13 +1565,21 @@ function renderGalleryPreview(){
   `).join('');
 }
 
+function resetFileInput(id){
+  const input = document.getElementById(id);
+  if(!input) return;
+  const fresh = input.cloneNode(true);
+  fresh.value = null;
+  input.parentNode.replaceChild(fresh, input);
+}
+
 function handleImgFiles(fileList){
   const files = Array.from(fileList).filter(file=>{
     if(file.size>5*1024*1024){ toast('error',`${file.name} is over 5MB — skipped.`); return false; }
     return true;
   });
   if(!files.length){
-    document.getElementById('af-img-files').value='';
+    resetFileInput('af-img-files');
     return;
   }
   Promise.all(files.map(file=>new Promise((resolve,reject)=>{
@@ -1486,7 +1593,7 @@ function handleImgFiles(fileList){
   }).catch(()=>{
     toast('error','Could not read one or more files.');
   }).finally(()=>{
-    document.getElementById('af-img-files').value='';
+    resetFileInput('af-img-files');
   });
 }
 
